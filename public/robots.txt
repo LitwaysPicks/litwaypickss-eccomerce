@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /confirmation
+Disallow: /cart
+Disallow: /wishlist
+Disallow: /unauthorized
+
+Sitemap: https://litwaypicks.com/sitemap.xml
