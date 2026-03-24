@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-border: #d1d5db;
+
+  --color-primary-50: #fff7ed;
+  --color-primary-100: #ffedd5;
+  --color-primary-200: #fed7aa;
+  --color-primary-300: #fdba74;
+  --color-primary-400: #fb923c;
+  --color-primary-500: #f97316;
+  --color-primary-600: #ea580c;
+  --color-primary-700: #c2410c;
+  --color-primary-800: #9a3412;
+  --color-primary-900: #7c2d12;
+
+  --color-secondary-50: #f8fafc;
+  --color-secondary-100: #f1f5f9;
+  --color-secondary-200: #e2e8f0;
+  --color-secondary-300: #cbd5e1;
+  --color-secondary-400: #94a3b8;
+  --color-secondary-500: #64748b;
+  --color-secondary-600: #475569;
+  --color-secondary-700: #334155;
+  --color-secondary-800: #1e293b;
+  --color-secondary-900: #0f172a;
+
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Font — loaded via next/font/google (self-hosted, no external request) */
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+  --animate-bounce-gentle: bounceGentle 2s infinite;
+
+  /* Keyframes */
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    0% { transform: translateY(10px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes bounceGentle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  @keyframes slideProgress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-white;
+}
+
+@utility btn-primary {
+  @apply bg-primary-600 text-white hover:bg-primary-700 shadow-lg hover:shadow-xl;
+}
+
+@utility btn-secondary {
+  @apply bg-secondary-100 text-secondary-900 hover:bg-secondary-200 shadow-md hover:shadow-lg;
+}
+
+@utility btn-outline {
+  @apply border-2 border-primary-200 bg-white text-primary-700 hover:bg-primary-50 hover:border-primary-300 shadow-md hover:shadow-lg;
+}
+
+@utility card {
+  @apply rounded-xl border border-gray-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300;
+}
+
+@utility card-elevated {
+  @apply rounded-xl border border-gray-200 bg-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1;
+}
+
+@utility input {
+  @apply flex h-10 w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:border-primary-300 disabled:cursor-not-allowed disabled:opacity-50 transition-colors;
+}
+
+@utility gradient-orange {
+  background: linear-gradient(135deg, #ff7849 0%, #ff5722 100%);
+}
+
+@utility gradient-blue {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+@utility gradient-green {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+@utility gradient-purple {
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+}
