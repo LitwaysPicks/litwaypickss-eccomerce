@@ -40,8 +40,8 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
 
   const loginMutation = useMutation({
     mutationFn: loginAction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auth-user"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       router.refresh();
       toast.success("Signed in successfully!");
       setLoginData({ email: "", password: "" });
@@ -52,8 +52,8 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
 
   const registerMutation = useMutation({
     mutationFn: signupAction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auth-user"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       router.refresh();
       toast.success("Account created successfully! Welcome aboard.");
       setRegisterData({
