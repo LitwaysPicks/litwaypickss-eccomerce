@@ -3,11 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { categories } from "@/data/products";
 
 const CLOTHING_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
-export default function ProductForm({ product, onSave, onCancel }) {
+export default function ProductForm({ product, categories = [], onSave, onCancel }) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -18,6 +17,7 @@ export default function ProductForm({ product, onSave, onCancel }) {
     category: "",
     brand: "",
     keywords: "",
+    featured: false,
   });
 
   const [uploadedImages, setUploadedImages] = useState([]);
@@ -33,12 +33,13 @@ export default function ProductForm({ product, onSave, onCancel }) {
         name: product.name || "",
         description: product.description || "",
         price: product.price?.toString() || "",
-        salePrice: product.salePrice?.toString() || "",
+        salePrice: product.sale_price?.toString() || "",
         stock: product.stock?.toString() || "",
-        category: product.category || "",
+        category: product.category_slug || "",
         sizes: product?.sizes || [],
         brand: product.brand || "",
         keywords: product.keywords || "",
+        featured: product.featured ?? false,
       });
       setUploadedImages(product.images || []);
       setVideoUrl(product.video_url || "");
