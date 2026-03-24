@@ -47,30 +47,51 @@
 
   /* Keyframes */
   @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
   @keyframes slideUp {
-    0% { transform: translateY(10px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+    0% {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 
   @keyframes bounceGentle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
   }
 
   @keyframes slideProgress {
-    from { width: 0%; }
-    to { width: 100%; }
+    from {
+      width: 0%;
+    }
+    to {
+      width: 100%;
+    }
   }
 }
 
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 font-sans;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
@@ -116,4 +137,7 @@
 
 @utility gradient-purple {
   background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+}
+red {
+  background-color: red;
 }
