@@ -165,6 +165,7 @@ export default function ProductsTab() {
           categories={categories}
           onSave={handleSave}
           onCancel={closeForm}
+          isSaving={addProduct.isPending || updateProduct.isPending}
         />
       )}
     </div>

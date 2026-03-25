@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useAdminStats } from "./useAdminStats";
 
 export function useDashboardStats() {
-  const { data: productStats } = useAdminStats();
+  const { data: productStats, isLoading: productStatsLoading } = useAdminStats();
 
   const { data: recentOrders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["admin-orders-30d"],
@@ -94,6 +94,6 @@ export function useDashboardStats() {
     revenueByDay,
     orderStatusData,
     recentOrders: [...recentOrders].reverse().slice(0, 5),
-    isLoading: ordersLoading || statsLoading,
+    isLoading: ordersLoading || statsLoading || productStatsLoading,
   };
 }
