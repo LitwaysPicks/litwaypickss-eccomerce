@@ -332,12 +332,20 @@ export default function Header() {
               <button
                 onClick={() =>
                   isAuthenticated
-                    ? setShowUserMenu(!showUserMenu)
+                    ? setShowMobileMenu(true)
                     : setShowLoginModal(true)
                 }
                 className="text-gray-700 hover:text-primary-600"
               >
-                <User className="h-5 w-5" />
+                {isAuthenticated ? (
+                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                    <span className="text-primary-600 text-sm font-medium">
+                      {user?.first_name?.[0]?.toUpperCase()}
+                    </span>
+                  </div>
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
               </button>
               <button
                 onClick={() => setShowMobileMenu((v) => !v)}
