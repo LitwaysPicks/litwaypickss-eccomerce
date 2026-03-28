@@ -6,6 +6,68 @@ import { toast } from "sonner";
 
 const CLOTHING_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
+// Shared chip-input used for both Colors and Tags.
+// Supports Enter key, comma, and an explicit Add button (required for mobile
+// virtual keyboards which often don't fire keydown events).
+function ChipInput({ chips, onAdd, onRemove, placeholder, hint, renderChip }) {
+  const [value, setValue] = useState("");
+
+  const commit = () => {
+    const v = value.trim();
+    if (!v) return;
+    onAdd(v);
+    setValue("");
+  };
+
+  const handleChange = (e) => {
+    const v = e.target.value;
+    // Auto-commit on comma (both desktop and mobile)
+    if (v.endsWith(",")) {
+      const item = v.slice(0, -1).trim();
+      if (item) onAdd(item);
+      setValue("");
+      return;
+    }
+    setValue(v);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commit();
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {chips.map((chip, idx) => renderChip(chip, idx, () => onRemove(idx)))}
+        </div>
+      )}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="input flex-1"
+        />
+        <button
+          type="button"
+          onClick={commit}
+          disabled={!value.trim()}
+          className="btn btn-outline shrink-0 px-4 disabled:opacity-40"
+        >
+          Add
+        </button>
+      </div>
+      {hint && <p className="text-[11px] text-gray-400">{hint}</p>}
+    </div>
+  );
+}
+
 export default function ProductForm({ product, categories = [], onSave, onCancel, isSaving = false }) {
   const [formData, setFormData] = useState({
     name: "",
@@ -22,7 +84,7 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
 
   const [uploadedImages, setUploadedImages] = useState([]);
   const [colors, setColors] = useState([]);
-  const [colorInput, setColorInput] = useState("");
+  const [tags, setTags] = useState([]);
   const [tempImages, setTempImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
@@ -44,6 +106,7 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
       setUploadedImages(product.images || []);
       setVideoUrl(product.video_url || "");
       setColors(product.colors || []);
+      setTags(product.tags || []);
     }
   }, [product]);
 
@@ -135,6 +198,7 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
       sizes: formData.sizes,
       keywords: formData.keywords,
       colors: colors.map((c) => c.trim()),
+      tags,
       videoUrl: videoUrl.trim() || null,
     });
   };
@@ -158,11 +222,9 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
       <div className="relative z-10 flex h-full w-full max-w-2xl flex-col bg-white shadow-2xl">
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 px-6">
-          <div>
-            <h2 className="text-[15px] font-semibold text-gray-900">
-              {product ? "Edit product" : "New product"}
-            </h2>
-          </div>
+          <h2 className="text-[15px] font-semibold text-gray-900">
+            {product ? "Edit product" : "New product"}
+          </h2>
           <button
             onClick={onCancel}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
@@ -325,10 +387,18 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
                 </div>
               )}
 
+              {/* Colors */}
               <div>
-                <label className="block mb-2 text-xs font-medium text-gray-600">Colors <span className="text-rose-500">*</span></label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {colors.map((color, idx) => (
+                <label className="block mb-2 text-xs font-medium text-gray-600">
+                  Colors <span className="text-rose-500">*</span>
+                </label>
+                <ChipInput
+                  chips={colors}
+                  onAdd={(c) => { if (!colors.includes(c)) setColors((prev) => [...prev, c]); }}
+                  onRemove={(idx) => setColors((prev) => prev.filter((_, i) => i !== idx))}
+                  placeholder="e.g. Red, Navy…"
+                  hint="Type a color and press Enter, comma, or tap Add"
+                  renderChip={(color, idx, onRemove) => (
                     <span
                       key={idx}
                       className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 pl-1.5 pr-2 py-1 text-xs text-gray-700"
@@ -340,32 +410,44 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
                       {color}
                       <button
                         type="button"
-                        onClick={() => setColors(colors.filter((_, i) => i !== idx))}
+                        onClick={onRemove}
                         className="text-gray-400 hover:text-gray-600 leading-none ml-0.5"
                       >
                         ×
                       </button>
                     </span>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  placeholder="Type a color and press Enter"
-                  value={colorInput}
-                  onChange={(e) => setColorInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if ((e.key === "Enter" || e.key === ",") && colorInput.trim()) {
-                      e.preventDefault();
-                      const c = colorInput.trim();
-                      if (!colors.includes(c)) setColors([...colors, c]);
-                      setColorInput("");
-                    }
-                  }}
-                  className="input"
+                  )}
                 />
-                <p className="mt-1.5 text-[11px] text-gray-400">Press Enter or comma to add each color</p>
               </div>
 
+              {/* Tags */}
+              <div>
+                <label className="block mb-2 text-xs font-medium text-gray-600">Tags</label>
+                <ChipInput
+                  chips={tags}
+                  onAdd={(t) => { if (!tags.includes(t)) setTags((prev) => [...prev, t]); }}
+                  onRemove={(idx) => setTags((prev) => prev.filter((_, i) => i !== idx))}
+                  placeholder="e.g. new-arrival, sale…"
+                  hint="Type a tag and press Enter, comma, or tap Add"
+                  renderChip={(tag, idx, onRemove) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-700"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={onRemove}
+                        className="text-primary-400 hover:text-primary-600 leading-none ml-0.5"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                />
+              </div>
+
+              {/* Keywords */}
               <div>
                 <label className="block mb-1.5 text-xs font-medium text-gray-600">Keywords</label>
                 <input
