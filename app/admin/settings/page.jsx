@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
+import { updateProfileAction } from "@/app/actions/auth";
 import { toast } from "sonner";
 import { User, Lock, Save, Loader2 } from "lucide-react";
 
@@ -48,21 +49,11 @@ export default function SettingsPage() {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      const { error } = await supabase
-        .from("users")
-        .update({
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          phone: profile.phone,
-          city: profile.city,
-          country: profile.country,
-        })
-        .eq("id", user.id);
-      if (error) throw error;
+      await updateProfileAction(user.id, profile);
       queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       toast.success("Profile updated");
-    } catch {
-      toast.error("Failed to update profile");
+    } catch (err) {
+      toast.error(err.message || "Failed to update profile");
     } finally {
       setSavingProfile(false);
     }
@@ -80,6 +71,7 @@ export default function SettingsPage() {
     }
     setSavingPassword(true);
     try {
+      const supabase = createClient();
       const { error } = await supabase.auth.updateUser({ password: passwords.new_ });
       if (error) throw error;
       toast.success("Password updated");

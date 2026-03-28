@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useAdminStats } from "./useAdminStats";
 
 export function useDashboardStats() {
-  const { data: productStats } = useAdminStats();
+  const { data: productStats, isLoading: productStatsLoading } = useAdminStats();
 
   const { data: recentOrders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["admin-orders-30d"],
@@ -20,6 +20,7 @@ export function useDashboardStats() {
       return data ?? [];
     },
     staleTime: 60_000,
+    retry: 1,
   });
 
   const { data: orderStats, isLoading: statsLoading } = useQuery({
@@ -38,6 +39,7 @@ export function useDashboardStats() {
       };
     },
     staleTime: 60_000,
+    retry: 1,
   });
 
   const { data: customerCount = 0 } = useQuery({
@@ -51,6 +53,7 @@ export function useDashboardStats() {
       return count ?? 0;
     },
     staleTime: 5 * 60_000,
+    retry: 1,
   });
 
   const revenueByDay = useMemo(() => {
@@ -94,6 +97,6 @@ export function useDashboardStats() {
     revenueByDay,
     orderStatusData,
     recentOrders: [...recentOrders].reverse().slice(0, 5),
-    isLoading: ordersLoading || statsLoading,
+    isLoading: ordersLoading || statsLoading || productStatsLoading,
   };
 }

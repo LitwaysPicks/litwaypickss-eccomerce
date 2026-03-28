@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 const CLOTHING_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
-export default function ProductForm({ product, categories = [], onSave, onCancel }) {
+export default function ProductForm({ product, categories = [], onSave, onCancel, isSaving = false }) {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -461,10 +461,11 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
             <button
               type="submit"
               form="product-form"
-              disabled={uploading}
-              className="btn btn-primary flex-1 py-2.5 disabled:opacity-50"
+              disabled={uploading || isSaving}
+              className="btn btn-primary flex-1 py-2.5 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {uploading ? "Uploading…" : product ? "Save changes" : "Add product"}
+              {(uploading || isSaving) && <Loader2 className="h-4 w-4 animate-spin" />}
+              {uploading ? "Uploading…" : isSaving ? (product ? "Saving…" : "Adding…") : product ? "Save changes" : "Add product"}
             </button>
             <button
               type="button"

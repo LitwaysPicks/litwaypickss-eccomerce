@@ -18,6 +18,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 // ─── Authentication ────────────────────────────────────────────────────────────
@@ -91,9 +92,11 @@ export async function signupAction({
     });
 
     if (profileError) {
-      throw new Error(
-        "Account created but profile setup failed — please update your profile.",
-      );
+      // Roll back the auth record so the user can retry without a "email
+      // already registered" error on their next signup attempt.
+      const adminSupabase = createAdminClient();
+      await adminSupabase.auth.admin.deleteUser(data.user.id);
+      throw new Error("Signup failed — please try again.");
     }
   }
 
@@ -183,9 +186,10 @@ export async function updateProfileAction(userId, data) {
   if (authError || !user) throw new Error("Not authenticated.");
   if (user.id !== userId) throw new Error("Unauthorized.");
 
-  // Strip role from editable fields — role changes must go through an admin
-  // action with its own authorization check.
-  const { role: _stripped, ...rawData } = data;
+  // Strip role and email — role changes require a separate admin action;
+  // email is owned by Supabase Auth and must be updated via updateUser(),
+  // not directly in the profile row.
+  const { role: _role, email: _email, ...rawData } = data;
 
   const KEY_MAP = {
     firstName: "first_name",

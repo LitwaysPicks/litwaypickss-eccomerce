@@ -53,7 +53,8 @@ export function useProducts({ search = "", category = "", page = 0 } = {}) {
     queryKey: ["admin-products", { search, category, page }],
     queryFn: () => fetchProducts({ search, category, page }),
     staleTime: 30_000,
-    placeholderData: keepPreviousData, // keeps previous page visible while next loads
+    placeholderData: keepPreviousData,
+    retry: 1,
   });
 
   // ── Categories (rarely changes) ─────────────────────────────────────────
@@ -65,6 +66,7 @@ export function useProducts({ search = "", category = "", page = 0 } = {}) {
       return data;
     },
     staleTime: 5 * 60_000,
+    retry: 1,
   });
 
   // ── Add ─────────────────────────────────────────────────────────────────

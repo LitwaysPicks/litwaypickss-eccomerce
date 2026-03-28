@@ -30,12 +30,79 @@ export default function ProductList({
 
   return (
     <div className="card overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Mobile card list */}
+      <div className="md:hidden divide-y divide-gray-100">
+        {products.map((product) => {
+          const isPendingDelete = deletingId === product.id;
+
+          if (isPendingDelete) {
+            return (
+              <div key={product.id} className="bg-rose-50/60 px-4 py-4">
+                <p className="text-sm text-gray-700 mb-3">
+                  Remove <span className="font-semibold text-gray-900">{product.name}</span>?{" "}
+                  <span className="text-gray-500">This cannot be undone.</span>
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={onCancelDelete}
+                    className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={onConfirmDelete}
+                    className="text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-lg px-3.5 py-1.5 transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div key={product.id} className="flex items-center gap-3 px-4 py-3">
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                {product.images?.[0] ? (
+                  <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-gray-300 text-xs">—</div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-gray-900 truncate text-sm">{product.name}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs text-gray-500 tabular-nums">{formatCurrency(product.price)}</span>
+                  <span className="text-gray-300">·</span>
+                  <StockBadge stock={product.stock} />
+                </div>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  onClick={() => onEdit(product)}
+                  className="text-xs font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-md px-2.5 py-1.5 transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => onDelete(product.id)}
+                  className="text-xs font-medium text-rose-500 hover:text-rose-700 border border-rose-200 rounded-md px-2.5 py-1.5 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100">
               <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-widest text-gray-400">Product</th>
-              <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-widest text-gray-400 hidden md:table-cell">Category</th>
+              <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-widest text-gray-400">Category</th>
               <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-widest text-gray-400 hidden lg:table-cell">Variants</th>
               <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-widest text-gray-400">Price</th>
               <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-widest text-gray-400">Stock</th>
@@ -77,7 +144,7 @@ export default function ProductList({
               }
 
               return (
-                <tr key={product.id} className="hover:bg-gray-50/60 transition-colors group">
+                <tr key={product.id} className="hover:bg-gray-50/60 transition-colors">
                   {/* Product */}
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
@@ -102,7 +169,7 @@ export default function ProductList({
                   </td>
 
                   {/* Category */}
-                  <td className="px-5 py-3.5 hidden md:table-cell">
+                  <td className="px-5 py-3.5">
                     <span className="text-gray-600">{product.category_name ?? "—"}</span>
                   </td>
 
@@ -154,7 +221,7 @@ export default function ProductList({
 
                   {/* Actions */}
                   <td className="px-5 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-4">
                       <button
                         onClick={() => onEdit(product)}
                         className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
