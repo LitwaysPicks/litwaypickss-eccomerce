@@ -137,6 +137,15 @@ export function useProducts({ search = "", category = "", page = 0 } = {}) {
         .eq("id", productId);
 
       if (error) throw error;
+
+      // Sync tags: replace all existing tags with the current set
+      await supabase.from("product_tags").delete().eq("product_id", productId);
+      if (productData.tags?.length > 0) {
+        const { error: tagError } = await supabase
+          .from("product_tags")
+          .insert(productData.tags.map((tag) => ({ product_id: productId, tag })));
+        if (tagError) throw tagError;
+      }
     },
     onSuccess: () => {
       toast.success("Product updated successfully!");
