@@ -20,6 +20,7 @@ export function useDashboardStats() {
       return data ?? [];
     },
     staleTime: 60_000,
+    retry: 1,
   });
 
   const { data: orderStats, isLoading: statsLoading } = useQuery({
@@ -38,6 +39,7 @@ export function useDashboardStats() {
       };
     },
     staleTime: 60_000,
+    retry: 1,
   });
 
   const { data: customerCount = 0 } = useQuery({
@@ -51,6 +53,7 @@ export function useDashboardStats() {
       return count ?? 0;
     },
     staleTime: 5 * 60_000,
+    retry: 1,
   });
 
   const revenueByDay = useMemo(() => {

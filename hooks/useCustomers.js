@@ -27,6 +27,7 @@ export function useCustomers({ search = "", page = 0 } = {}) {
     },
     staleTime: 60_000,
     placeholderData: keepPreviousData,
+    retry: 1,
   });
 
   return {

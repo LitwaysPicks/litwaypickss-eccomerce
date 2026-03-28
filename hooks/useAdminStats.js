@@ -24,5 +24,6 @@ export function useAdminStats() {
       };
     },
     staleTime: 60_000,
+    retry: 1,
   });
 }

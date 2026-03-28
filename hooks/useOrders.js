@@ -30,6 +30,7 @@ export function useOrders({ status = "", search = "", page = 0 } = {}) {
     },
     staleTime: 30_000,
     placeholderData: keepPreviousData,
+    retry: 1,
   });
 
   const updateStatus = useMutation({

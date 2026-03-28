@@ -13,9 +13,15 @@ export default function AdminShell({ children }) {
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    {/* h-dvh = dynamic viewport height: correct on mobile (excludes browser chrome).
+        h-screen fallback for browsers that don't support dvh. */}
+    <div className="flex h-dvh overflow-hidden bg-gray-50">
       {sidebarOpen && (
-        <div className="fixed inset-0 z-20 bg-black/60 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 z-20 bg-black/60 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          onTouchEnd={(e) => { e.preventDefault(); setSidebarOpen(false); }}
+        />
       )}
       <aside className={`fixed inset-y-0 left-0 z-30 w-64 transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0 lg:flex lg:shrink-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <AdminSidebar />
