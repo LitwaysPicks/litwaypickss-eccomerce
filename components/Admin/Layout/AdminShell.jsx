@@ -13,8 +13,6 @@ export default function AdminShell({ children }) {
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   return (
-    {/* h-dvh = dynamic viewport height: correct on mobile (excludes browser chrome).
-        h-screen fallback for browsers that don't support dvh. */}
     <div className="flex h-dvh overflow-hidden bg-gray-50">
       {sidebarOpen && (
         <div
