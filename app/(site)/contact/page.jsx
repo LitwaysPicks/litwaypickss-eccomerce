@@ -43,7 +43,7 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: "Email",
-      details: "support@litwaypicks.com",
+      details: "litwaypicks@gmail.com",
       description: "We typically respond within 24 hours",
     },
     {

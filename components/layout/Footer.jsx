@@ -71,7 +71,11 @@ export default function Footer() {
             <div className="flex items-center gap-2 mt-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 w-fit">
               <Smartphone className="h-4 w-4 text-yellow-400 shrink-0" />
               <p className="text-xs text-gray-300 leading-tight">
-                We accept <span className="text-yellow-400 font-semibold">Mobile Money</span> payments nationwide
+                We accept{" "}
+                <span className="text-yellow-400 font-semibold">
+                  Mobile Money
+                </span>{" "}
+                payments nationwide
               </p>
             </div>
           </div>
@@ -134,7 +138,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-primary-400 shrink-0" />
-                <span>support@litwaypicks.com</span>
+                <span>litwaypicks@gmail.com</span>
               </div>
               <div className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 text-primary-400 shrink-0 mt-0.5" />
