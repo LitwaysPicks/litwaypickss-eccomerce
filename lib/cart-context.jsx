@@ -14,6 +14,9 @@ export function CartProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false)
   const [userId, setUserId] = useState(null)
   const syncTimer = useRef(null)
+  // Set during the auth-merge setState to prevent the sync useEffect from
+  // scheduling a redundant second save for the same data.
+  const skipNextSyncRef = useRef(false)
 
   const loadFromSupabase = async (uid) => {
     const { data } = await supabase
@@ -51,6 +54,7 @@ export function CartProvider({ children }) {
           const remoteItems = await loadFromSupabase(uid)
           setItems(prev => {
             const merged = mergeCartItems(remoteItems ?? [], prev)
+            skipNextSyncRef.current = true
             scheduleSave(uid, merged)
             return merged
           })
@@ -65,6 +69,10 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    if (skipNextSyncRef.current) {
+      skipNextSyncRef.current = false
+      return
+    }
     if (userId) scheduleSave(userId, items)
   }, [items, userId])
 
@@ -145,10 +153,6 @@ export function useCart() {
 }
 
 function mergeCartItems(remote, local) {
-  const merged = [...remote]
-  for (const localItem of local) {
-    const exists = merged.find(r => r.id === localItem.id)
-    if (!exists) merged.push(localItem)
-  }
-  return merged
+  const remoteIds = new Set(remote.map(r => r.id))
+  return [...remote, ...local.filter(l => !remoteIds.has(l.id))]
 }

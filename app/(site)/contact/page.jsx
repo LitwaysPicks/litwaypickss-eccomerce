@@ -31,13 +31,13 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: "Phone",
-      details: "+231-888-640-502",
+      details: "+231-888-464-940",
       description: "Call us Monday to Friday, 8AM - 6PM",
     },
     {
       icon: MessageCircle,
       title: "WhatsApp",
-      details: "+231-888-640-502",
+      details: "+231-888-464-940",
       description: "Message us anytime for quick support",
     },
     {
@@ -93,11 +93,16 @@ export default function ContactPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {contactInfo.map((info, index) => (
-          <div key={index} className="card p-6 text-center hover:shadow-lg transition-shadow">
+          <div
+            key={index}
+            className="card p-6 text-center hover:shadow-lg transition-shadow"
+          >
             <div className="bg-primary-100 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
               <info.icon className="h-8 w-8 text-primary-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{info.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {info.title}
+            </h3>
             <p className="font-medium text-primary-600 mb-1">{info.details}</p>
             <p className="text-sm text-gray-600">{info.description}</p>
           </div>
@@ -106,10 +111,14 @@ export default function ContactPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Send us a Message
+          </h2>
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name *
+              </label>
               <input
                 type="text"
                 name="name"
@@ -121,7 +130,9 @@ export default function ContactPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address *
+              </label>
               <input
                 type="email"
                 name="email"
@@ -133,7 +144,9 @@ export default function ContactPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Subject *
+              </label>
               <select
                 name="subject"
                 required
@@ -152,7 +165,9 @@ export default function ContactPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Message *
+              </label>
               <textarea
                 name="message"
                 required
@@ -174,11 +189,15 @@ export default function ContactPage() {
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Frequently Asked Questions
+          </h2>
           <div className="space-y-4">
             {faqs.map((faq, index) => (
               <div key={index} className="card p-6">
-                <h3 className="font-semibold text-gray-900 mb-2">{faq.question}</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  {faq.question}
+                </h3>
                 <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
               </div>
             ))}
@@ -189,7 +208,9 @@ export default function ContactPage() {
       <div className="mt-12 card p-8 bg-gray-50">
         <div className="text-center">
           <Clock className="h-12 w-12 text-primary-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Business Hours</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            Business Hours
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
             <div>
               <p className="font-medium text-gray-900">Monday - Friday</p>

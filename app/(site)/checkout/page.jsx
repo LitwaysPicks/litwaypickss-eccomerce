@@ -9,7 +9,6 @@ import { useCart } from "@/lib/cart-context";
 import { formatCurrency } from "@/lib/currency";
 import { momoAPI } from "@/lib/api-config";
 import { toast } from "sonner";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/lib/auth-context";
 
 const LIBERIA_COUNTIES = [
@@ -71,6 +70,8 @@ function CheckoutContent() {
     }));
   }, [user]);
 
+  const finalTotal = total;
+
   // Refs so the polling closure always sees the latest values
   // without adding them as effect deps (which would restart the interval)
   const latestRef = useRef({});
@@ -79,8 +80,6 @@ function CheckoutContent() {
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const finalTotal = total;
 
   useEffect(() => {
     if (!referenceId || isPolling.current) return;
@@ -548,9 +547,5 @@ function CheckoutContent() {
 }
 
 export default function CheckoutPage() {
-  return (
-    <ProtectedRoute requireAuth={true}>
-      <CheckoutContent />
-    </ProtectedRoute>
-  );
+  return <CheckoutContent />;
 }

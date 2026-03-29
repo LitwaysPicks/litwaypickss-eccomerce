@@ -16,13 +16,21 @@ export default function PrivacyPage() {
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-100 to-orange-100 rounded-full px-6 py-2 mb-6">
           <Shield className="h-4 w-4 text-primary-600" />
-          <span className="text-primary-600 font-semibold text-sm">YOUR DATA IS SAFE</span>
+          <span className="text-primary-600 font-semibold text-sm">
+            YOUR DATA IS SAFE
+          </span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Privacy Policy
+        </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          We respect your privacy and are committed to protecting your personal information. This policy explains how we collect, use, and safeguard your data.
+          We respect your privacy and are committed to protecting your personal
+          information. This policy explains how we collect, use, and safeguard
+          your data.
         </p>
-        <p className="text-sm text-gray-400 mt-4">Last updated: {lastUpdated}</p>
+        <p className="text-sm text-gray-400 mt-4">
+          Last updated: {lastUpdated}
+        </p>
       </div>
 
       {/* Key Points */}
@@ -52,7 +60,8 @@ export default function PrivacyPage() {
           {
             icon: Lock,
             title: "Secured",
-            description: "Industry-standard security measures protect your data.",
+            description:
+              "Industry-standard security measures protect your data.",
             gradient: "from-primary-500 to-primary-600",
             bg: "from-primary-50 to-orange-100",
           },
@@ -66,8 +75,12 @@ export default function PrivacyPage() {
             >
               <item.icon className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">{item.title}</h3>
-            <p className="text-gray-700 text-sm leading-relaxed">{item.description}</p>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">
+              {item.title}
+            </h3>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {item.description}
+            </p>
           </div>
         ))}
       </div>
@@ -80,10 +93,14 @@ export default function PrivacyPage() {
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 rounded-xl shadow">
               <Eye className="h-5 w-5 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Information We Collect</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Information We Collect
+            </h2>
           </div>
           <p className="text-gray-700 leading-relaxed mb-4">
-            We collect information you provide directly to us when you make a purchase, create an account, or sign up for our newsletter. This includes:
+            We collect information you provide directly to us when you make a
+            purchase, create an account, or sign up for our newsletter. This
+            includes:
           </p>
           <ul className="space-y-2 text-gray-700">
             {[
@@ -100,7 +117,9 @@ export default function PrivacyPage() {
             ))}
           </ul>
           <p className="text-gray-700 text-sm mt-4 leading-relaxed">
-            We may also automatically collect certain technical information when you visit our website, such as your IP address, browser type, and pages visited, for analytics and security purposes.
+            We may also automatically collect certain technical information when
+            you visit our website, such as your IP address, browser type, and
+            pages visited, for analytics and security purposes.
           </p>
         </div>
 
@@ -110,28 +129,48 @@ export default function PrivacyPage() {
             <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2.5 rounded-xl shadow">
               <UserCheck className="h-5 w-5 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">How We Use Your Data</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              How We Use Your Data
+            </h2>
           </div>
           <p className="text-gray-700 leading-relaxed mb-4">
             Your data is used solely for the following purposes:
           </p>
           <ul className="space-y-3 text-gray-700">
             {[
-              { title: "Order Processing", desc: "To fulfill, manage, and deliver your orders." },
-              { title: "Customer Support", desc: "To respond to your inquiries and resolve issues." },
-              { title: "Account Management", desc: "To maintain your account and preferences." },
-              { title: "Website Improvement", desc: "To analyze usage patterns and improve our platform." },
-              { title: "Marketing (opt-in only)", desc: "To send promotional updates if you have subscribed to our newsletter." },
+              {
+                title: "Order Processing",
+                desc: "To fulfill, manage, and deliver your orders.",
+              },
+              {
+                title: "Customer Support",
+                desc: "To respond to your inquiries and resolve issues.",
+              },
+              {
+                title: "Account Management",
+                desc: "To maintain your account and preferences.",
+              },
+              {
+                title: "Website Improvement",
+                desc: "To analyze usage patterns and improve our platform.",
+              },
+              {
+                title: "Marketing (opt-in only)",
+                desc: "To send promotional updates if you have subscribed to our newsletter.",
+              },
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-3 text-sm">
                 <div className="w-1.5 h-1.5 bg-primary-500 rounded-full mt-1.5 shrink-0" />
-                <span><strong>{item.title}:</strong> {item.desc}</span>
+                <span>
+                  <strong>{item.title}:</strong> {item.desc}
+                </span>
               </li>
             ))}
           </ul>
           <div className="mt-5 p-4 bg-green-50 border border-green-200 rounded-xl">
             <p className="text-green-800 text-sm font-semibold">
-              We will never sell, rent, or trade your personal information to any third party.
+              We will never sell, rent, or trade your personal information to
+              any third party.
             </p>
           </div>
         </div>
@@ -145,7 +184,8 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold text-gray-900">Cookies</h2>
           </div>
           <p className="text-gray-700 leading-relaxed mb-4">
-            Our website uses cookies to enhance your browsing experience. Cookies are small text files stored on your device that help us:
+            Our website uses cookies to enhance your browsing experience.
+            Cookies are small text files stored on your device that help us:
           </p>
           <ul className="space-y-2 text-gray-700 text-sm mb-4">
             {[
@@ -161,7 +201,8 @@ export default function PrivacyPage() {
             ))}
           </ul>
           <p className="text-gray-600 text-sm">
-            You may disable cookies in your browser settings, but this may affect certain features of the website.
+            You may disable cookies in your browser settings, but this may
+            affect certain features of the website.
           </p>
         </div>
 
@@ -174,7 +215,8 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold text-gray-900">Data Security</h2>
           </div>
           <p className="text-gray-700 leading-relaxed mb-4">
-            We implement a variety of security measures to maintain the safety of your personal information:
+            We implement a variety of security measures to maintain the safety
+            of your personal information:
           </p>
           <ul className="space-y-2 text-gray-700 text-sm">
             {[
@@ -229,14 +271,17 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold text-gray-900">Contact Us</h2>
           </div>
           <p className="text-gray-700 leading-relaxed mb-4">
-            If you have any questions or concerns about this Privacy Policy or how your data is handled, please reach out to us:
+            If you have any questions or concerns about this Privacy Policy or
+            how your data is handled, please reach out to us:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
               <Phone className="h-5 w-5 text-primary-500 shrink-0" />
               <div>
-                <p className="font-semibold text-gray-900 text-sm">Phone / WhatsApp</p>
-                <p className="text-gray-600 text-sm">+231-888-640-502</p>
+                <p className="font-semibold text-gray-900 text-sm">
+                  Phone / WhatsApp
+                </p>
+                <p className="text-gray-600 text-sm">+231-888-464-940</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">

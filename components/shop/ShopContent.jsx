@@ -125,16 +125,16 @@ export default function ShopContent({
         </div>
 
         <div className="flex items-center space-x-4 mt-4 md:mt-0">
-          <div className="flex border rounded-lg">
+          <div className="flex border rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 ${viewMode === "grid" ? "bg-primary-600 text-white" : "text-gray-600"}`}
+              className={`p-2 transition-colors ${viewMode === "grid" ? "bg-primary-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <Grid className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 ${viewMode === "list" ? "bg-primary-600 text-white" : "text-gray-600"}`}
+              className={`p-2 transition-colors ${viewMode === "list" ? "bg-primary-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}
             >
               <List className="h-4 w-4" />
             </button>

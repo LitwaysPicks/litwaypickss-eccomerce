@@ -22,10 +22,7 @@ import { useAuth } from "@/lib/auth-context";
 import { logoutAction } from "@/app/actions/auth";
 import { queryClient } from "@/lib/queryClient";
 import { motion } from "motion/react";
-import {
-  getSearchSuggestions,
-  getPopularSearchTerms,
-} from "@/data/products";
+import { getSearchSuggestions, getPopularSearchTerms } from "@/data/products";
 import LoginModal from "@/components/auth/LoginModal";
 
 const categories = [
@@ -61,7 +58,12 @@ function Logo() {
   );
 }
 
-const TYPE_LABEL = { product: "Product", brand: "Brand", category: "Category", tag: "Tag" };
+const TYPE_LABEL = {
+  product: "Product",
+  brand: "Brand",
+  category: "Category",
+  tag: "Tag",
+};
 const TYPE_COLOR = {
   product: "text-blue-500 bg-blue-50",
   brand: "text-purple-500 bg-purple-50",
@@ -116,14 +118,20 @@ function SearchBox({
               {recentSearches.map((s) => (
                 <div key={s} className="flex items-center group">
                   <button
-                    onMouseDown={(e) => { e.preventDefault(); onSuggestionClick(s); }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      onSuggestionClick(s);
+                    }}
                     className="flex-1 flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left"
                   >
                     <Clock className="h-3.5 w-3.5 text-gray-400 shrink-0" />
                     <span className="text-sm text-gray-700">{s}</span>
                   </button>
                   <button
-                    onMouseDown={(e) => { e.preventDefault(); onRemoveRecent(s); }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      onRemoveRecent(s);
+                    }}
                     className="pr-3 text-gray-300 hover:text-gray-500"
                     aria-label="Remove"
                   >
@@ -146,7 +154,10 @@ function SearchBox({
                 return (
                   <button
                     key={i}
-                    onMouseDown={(e) => { e.preventDefault(); onSuggestionClick(text); }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      onSuggestionClick(text);
+                    }}
                     className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center justify-between gap-2"
                   >
                     <div className="flex items-center gap-2">
@@ -154,7 +165,9 @@ function SearchBox({
                       <span className="text-sm text-gray-800">{text}</span>
                     </div>
                     {type && (
-                      <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${TYPE_COLOR[type]}`}>
+                      <span
+                        className={`text-xs font-medium px-1.5 py-0.5 rounded ${TYPE_COLOR[type]}`}
+                      >
                         {TYPE_LABEL[type]}
                       </span>
                     )}
@@ -165,7 +178,9 @@ function SearchBox({
           )}
 
           {isTyping && searchSuggestions.length === 0 && (
-            <div className="px-4 py-3 text-sm text-gray-400">No suggestions found</div>
+            <div className="px-4 py-3 text-sm text-gray-400">
+              No suggestions found
+            </div>
           )}
         </div>
       )}
@@ -190,7 +205,9 @@ export default function Header() {
   // Load recent searches from localStorage
   useEffect(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem("lw_recent_searches") || "[]");
+      const stored = JSON.parse(
+        localStorage.getItem("lw_recent_searches") || "[]",
+      );
       setRecentSearches(Array.isArray(stored) ? stored.slice(0, 3) : []);
     } catch {
       setRecentSearches([]);
@@ -270,7 +287,9 @@ export default function Header() {
 
   const navLinkClass = (href) =>
     `text-sm font-medium transition-colors hover:text-primary-600 ${
-      isActive(href) ? "text-primary-600 border-b-2 border-primary-600 pb-0.5" : "text-gray-700"
+      isActive(href)
+        ? "text-primary-600 border-b-2 border-primary-600 pb-0.5"
+        : "text-gray-700"
     }`;
 
   const searchBoxProps = {
@@ -297,7 +316,7 @@ export default function Header() {
               <span>Free Nationwide Delivery</span>
             </div>
             <div className="hidden md:flex gap-4">
-              <span>📞 +231-888-640-502</span>
+              <span>📞 +231-888-464-940</span>
               <span>💬 WhatsApp Support</span>
               {isAdmin && (
                 <Link
@@ -352,7 +371,11 @@ export default function Header() {
                 aria-label={showMobileMenu ? "Close menu" : "Open menu"}
                 className="text-gray-700 hover:text-primary-600"
               >
-                {showMobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {showMobileMenu ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
               </button>
             </div>
           </div>
@@ -455,15 +478,27 @@ export default function Header() {
         {/* Desktop Nav — hidden on mobile (hamburger handles mobile nav) */}
         <nav className="border-t bg-white hidden md:block">
           <div className="flex items-center space-x-6 px-4 py-3 text-sm font-medium whitespace-nowrap overflow-x-auto scrollbar-hide">
-            <Link href="/" className={navLinkClass("/")}>Home</Link>
-            <Link href="/shop" className={navLinkClass("/shop")}>Shop</Link>
+            <Link href="/" className={navLinkClass("/")}>
+              Home
+            </Link>
+            <Link href="/shop" className={navLinkClass("/shop")}>
+              Shop
+            </Link>
             {categories.map((cat) => (
-              <Link key={cat.href} href={cat.href} className={navLinkClass(cat.href)}>
+              <Link
+                key={cat.href}
+                href={cat.href}
+                className={navLinkClass(cat.href)}
+              >
                 {cat.name}
               </Link>
             ))}
-            <Link href="/about" className={navLinkClass("/about")}>About</Link>
-            <Link href="/contact" className={navLinkClass("/contact")}>Contact</Link>
+            <Link href="/about" className={navLinkClass("/about")}>
+              About
+            </Link>
+            <Link href="/contact" className={navLinkClass("/contact")}>
+              Contact
+            </Link>
           </div>
         </nav>
 
@@ -528,7 +563,10 @@ export default function Header() {
               {isAuthenticated ? (
                 <>
                   <div className="px-3 py-2 text-sm text-gray-500">
-                    Signed in as <span className="font-medium text-gray-900">{user?.first_name}</span>
+                    Signed in as{" "}
+                    <span className="font-medium text-gray-900">
+                      {user?.first_name}
+                    </span>
                   </div>
                   <Link
                     href="/account"
