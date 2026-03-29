@@ -46,7 +46,7 @@ export default function TermsPage() {
               "Product images are for illustration purposes — slight variations may occur.",
               "All orders are subject to availability. If an item is out of stock after your order, we will notify you promptly and offer a refund or alternative.",
               "We reserve the right to refuse or cancel any order at our discretion.",
-              "Prices are listed in Liberian Dollars (LRD) or US Dollars (USD) and are subject to change without notice.",
+              "Prices are listed in US Dollars (USD) and are subject to change without notice.",
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 bg-primary-500 rounded-full mt-1.5 shrink-0" />

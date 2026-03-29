@@ -8,7 +8,7 @@ import RecentPurchases from "@/components/home/RecentPurchases";
 
 export default function HomePage() {
   return (
-    <div className="space-y-16">
+    <div>
       <Hero />
       <div className="container mx-auto px-4">
         <FeaturedProducts />

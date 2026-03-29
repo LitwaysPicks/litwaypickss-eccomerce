@@ -21,10 +21,8 @@ import { useWishlist } from "@/lib/wishlist-context";
 import { useAuth } from "@/lib/auth-context";
 import { logoutAction } from "@/app/actions/auth";
 import { queryClient } from "@/lib/queryClient";
-import { motion } from "motion/react";
 import { getSearchSuggestions, getPopularSearchTerms } from "@/data/products";
 import LoginModal from "@/components/auth/LoginModal";
-
 const categories = [
   { name: "Men's", href: "/shop/mens" },
   { name: "Women's", href: "/shop/womens" },
@@ -37,23 +35,11 @@ const categories = [
 
 function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-1 group">
-      <motion.div
-        initial={{ rotate: 0 }}
-        animate={{ rotate: [0, 15, -15, 0] }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
-        className="text-primary-600"
-      >
-        <ShoppingCart className="h-7 w-7 md:h-8 md:w-8" />
-      </motion.div>
-      <motion.span
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-2xl md:text-3xl font-extrabold text-primary-600 tracking-tight group-hover:tracking-wider transition-all"
-      >
+    <Link href="/" className="flex items-center gap-1.5">
+      <ShoppingCart className="h-6 w-6 md:h-7 md:w-7 text-primary-600 animate-wiggle" />
+      <span className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
         LitwayPicks
-      </motion.span>
+      </span>
     </Link>
   );
 }
@@ -316,8 +302,8 @@ export default function Header() {
               <span>Free Nationwide Delivery</span>
             </div>
             <div className="hidden md:flex gap-4">
-              <span>📞 +231-888-464-940</span>
-              <span>💬 WhatsApp Support</span>
+              <span>+231-888-464-940</span>
+              <span>WhatsApp Support</span>
               {isAdmin && (
                 <Link
                   href="/admin"
@@ -475,8 +461,8 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Desktop Nav — hidden on mobile (hamburger handles mobile nav) */}
-        <nav className="border-t bg-white hidden md:block">
+        {/* Nav — always visible, scrolls horizontally on mobile */}
+        <nav className="border-t bg-white">
           <div className="flex items-center space-x-6 px-4 py-3 text-sm font-medium whitespace-nowrap overflow-x-auto scrollbar-hide">
             <Link href="/" className={navLinkClass("/")}>
               Home

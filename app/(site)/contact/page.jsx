@@ -68,7 +68,7 @@ export default function ContactPage() {
     {
       question: "What payment methods do you accept?",
       answer:
-        "We accept Mobile Money (Orange Money, MTN MoMo), Cash on Delivery, and bank transfers.",
+        "We accept Mobile Money ( MTN MoMo), Cash on Delivery, and bank transfers.",
     },
     {
       question: "Can I return or exchange items?",

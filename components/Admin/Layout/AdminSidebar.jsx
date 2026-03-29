@@ -7,7 +7,7 @@ import { queryClient } from "@/lib/queryClient";
 import { logoutUser } from "@/lib/auth";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Settings,
-  LogOut,
+  LogOut, Tag,
 } from "lucide-react";
 
 const NAV = [
@@ -21,6 +21,7 @@ const NAV = [
     group: "Catalog",
     items: [
       { href: "/admin/products", label: "Products", icon: Package },
+      { href: "/admin/categories", label: "Categories", icon: Tag },
     ],
   },
   {
