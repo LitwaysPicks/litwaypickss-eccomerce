@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { FileText, ShoppingBag, CreditCard, AlertTriangle, Scale, Phone } from "lucide-react";
+import {
+  FileText,
+  ShoppingBag,
+  CreditCard,
+  AlertTriangle,
+  Scale,
+  Phone,
+} from "lucide-react";
 
 export const metadata = {
   title: "Terms & Conditions | LitwayPicks",
@@ -17,7 +24,10 @@ export default function TermsPage() {
       title: "1. Acceptance of Terms",
       content: (
         <p className="text-gray-700 leading-relaxed">
-          By accessing and using the LitwayPicks website and placing orders, you accept and agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, please do not use our platform.
+          By accessing and using the LitwayPicks website and placing orders, you
+          accept and agree to be bound by these Terms and Conditions. If you do
+          not agree with any part of these terms, please do not use our
+          platform.
         </p>
       ),
     },
@@ -27,7 +37,10 @@ export default function TermsPage() {
       title: "2. Products & Orders",
       content: (
         <div className="space-y-3 text-gray-700 text-sm leading-relaxed">
-          <p>We reserve the right to modify or discontinue any product at any time without notice.</p>
+          <p>
+            We reserve the right to modify or discontinue any product at any
+            time without notice.
+          </p>
           <ul className="space-y-2">
             {[
               "Product images are for illustration purposes — slight variations may occur.",
@@ -50,7 +63,10 @@ export default function TermsPage() {
       title: "3. Payments",
       content: (
         <div className="space-y-3 text-gray-700 text-sm leading-relaxed">
-          <p>All payments must be made in full before your order is processed and dispatched.</p>
+          <p>
+            All payments must be made in full before your order is processed and
+            dispatched.
+          </p>
           <ul className="space-y-2">
             {[
               "We currently accept MTN Mobile Money as our primary payment method.",
@@ -74,13 +90,20 @@ export default function TermsPage() {
       content: (
         <div className="space-y-3 text-gray-700 text-sm leading-relaxed">
           <p>
-            All delivery is free nationwide. Orders are processed within 1–2 business days. For full details, please refer to our{" "}
-            <Link href="/shipping" className="text-primary-600 hover:underline font-medium">
+            All delivery is free nationwide. Orders are processed within 1–2
+            business days. For full details, please refer to our{" "}
+            <Link
+              href="/shipping"
+              className="text-primary-600 hover:underline font-medium"
+            >
               Shipping & Delivery Policy
-            </Link>.
+            </Link>
+            .
           </p>
           <p>
-            LitwayPicks is not responsible for delivery delays caused by circumstances beyond our control, including natural disasters, civil unrest, or carrier disruptions.
+            LitwayPicks is not responsible for delivery delays caused by
+            circumstances beyond our control, including natural disasters, civil
+            unrest, or carrier disruptions.
           </p>
         </div>
       ),
@@ -92,10 +115,15 @@ export default function TermsPage() {
       content: (
         <div className="text-gray-700 text-sm leading-relaxed">
           <p>
-            We offer a 7-day return policy on eligible items. For full details, please refer to our{" "}
-            <Link href="/returns" className="text-primary-600 hover:underline font-medium">
+            We offer a 7-day return policy on eligible items. For full details,
+            please refer to our{" "}
+            <Link
+              href="/returns"
+              className="text-primary-600 hover:underline font-medium"
+            >
               Return & Refund Policy
-            </Link>.
+            </Link>
+            .
           </p>
         </div>
       ),
@@ -107,10 +135,13 @@ export default function TermsPage() {
       content: (
         <div className="space-y-3 text-gray-700 text-sm leading-relaxed">
           <p>
-            All content on this website — including text, graphics, logos, images, and software — is the property of LitwayPicks and is protected by applicable copyright and trademark laws.
+            All content on this website — including text, graphics, logos,
+            images, and software — is the property of LitwayPicks and is
+            protected by applicable copyright and trademark laws.
           </p>
           <p>
-            You may not reproduce, distribute, or use any content from this site without express written permission from LitwayPicks.
+            You may not reproduce, distribute, or use any content from this site
+            without express written permission from LitwayPicks.
           </p>
         </div>
       ),
@@ -122,10 +153,14 @@ export default function TermsPage() {
       content: (
         <div className="space-y-3 text-gray-700 text-sm leading-relaxed">
           <p>
-            LitwayPicks shall not be held liable for any indirect, incidental, or consequential damages arising from the use of our platform or products, including but not limited to loss of data or profit.
+            LitwayPicks shall not be held liable for any indirect, incidental,
+            or consequential damages arising from the use of our platform or
+            products, including but not limited to loss of data or profit.
           </p>
           <p>
-            Our total liability for any claim arising from these terms shall not exceed the amount paid for the specific product or order in question.
+            Our total liability for any claim arising from these terms shall not
+            exceed the amount paid for the specific product or order in
+            question.
           </p>
         </div>
       ),
@@ -160,7 +195,10 @@ export default function TermsPage() {
       content: (
         <p className="text-gray-700 text-sm leading-relaxed">
           Your use of our platform is also governed by our{" "}
-          <Link href="/privacy" className="text-primary-600 hover:underline font-medium">
+          <Link
+            href="/privacy"
+            className="text-primary-600 hover:underline font-medium"
+          >
             Privacy Policy
           </Link>
           , which is incorporated into these Terms and Conditions by reference.
@@ -173,7 +211,10 @@ export default function TermsPage() {
       title: "10. Changes to Terms",
       content: (
         <p className="text-gray-700 text-sm leading-relaxed">
-          LitwayPicks reserves the right to update these Terms and Conditions at any time. Changes will be posted on this page with an updated date. Continued use of our platform after changes are made constitutes acceptance of the revised terms.
+          LitwayPicks reserves the right to update these Terms and Conditions at
+          any time. Changes will be posted on this page with an updated date.
+          Continued use of our platform after changes are made constitutes
+          acceptance of the revised terms.
         </p>
       ),
     },
@@ -191,9 +232,12 @@ export default function TermsPage() {
           Terms & Conditions
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Please read these terms carefully before using LitwayPicks. By shopping with us, you agree to the conditions outlined below.
+          Please read these terms carefully before using LitwayPicks. By
+          shopping with us, you agree to the conditions outlined below.
         </p>
-        <p className="text-sm text-gray-400 mt-4">Last updated: {lastUpdated}</p>
+        <p className="text-sm text-gray-400 mt-4">
+          Last updated: {lastUpdated}
+        </p>
       </div>
 
       {/* Sections */}
@@ -201,10 +245,14 @@ export default function TermsPage() {
         {sections.map((section, i) => (
           <div key={i} className="card-elevated p-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className={`bg-gradient-to-br ${section.gradient} p-2.5 rounded-xl shadow`}>
+              <div
+                className={`bg-gradient-to-br ${section.gradient} p-2.5 rounded-xl shadow`}
+              >
                 <section.icon className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                {section.title}
+              </h2>
             </div>
             {section.content}
           </div>
@@ -216,10 +264,14 @@ export default function TermsPage() {
             <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-2.5 rounded-xl shadow">
               <Scale className="h-5 w-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900">11. Governing Law</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              11. Governing Law
+            </h2>
           </div>
           <p className="text-gray-700 text-sm leading-relaxed">
-            These Terms and Conditions are governed by the laws of the Republic of Liberia. Any disputes arising from the use of our platform shall be subject to the jurisdiction of the courts of Liberia.
+            These Terms and Conditions are governed by the laws of the Republic
+            of Liberia. Any disputes arising from the use of our platform shall
+            be subject to the jurisdiction of the courts of Liberia.
           </p>
         </div>
 
@@ -232,14 +284,17 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-gray-900">12. Contact</h2>
           </div>
           <p className="text-gray-700 text-sm leading-relaxed mb-4">
-            If you have any questions about these Terms and Conditions, please contact us:
+            If you have any questions about these Terms and Conditions, please
+            contact us:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
               <Phone className="h-5 w-5 text-primary-500 shrink-0" />
               <div>
-                <p className="font-semibold text-gray-900 text-sm">Phone / WhatsApp</p>
-                <p className="text-gray-600 text-sm">+231-888-640-502</p>
+                <p className="font-semibold text-gray-900 text-sm">
+                  Phone / WhatsApp
+                </p>
+                <p className="text-gray-600 text-sm">+231-888-464-940</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">

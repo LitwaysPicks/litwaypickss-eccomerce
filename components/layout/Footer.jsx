@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { ShoppingCart, Mail, Phone, MapPin } from "lucide-react";
+import { ShoppingCart, Mail, Phone, MapPin, Smartphone } from "lucide-react";
 
 function FacebookIcon({ className }) {
   return (
@@ -33,10 +33,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 group"
-            >
+            <Link href="/" className="flex items-center gap-2 group">
               <ShoppingCart className="h-7 w-7 text-primary-500" />
               <span className="text-2xl font-extrabold text-primary-500 tracking-tight group-hover:tracking-wider transition-all">
                 LitwayPicks
@@ -69,11 +66,21 @@ export default function Footer() {
                 <InstagramIcon className="h-5 w-5" />
               </a>
             </div>
+
+            {/* Payment badge */}
+            <div className="flex items-center gap-2 mt-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 w-fit">
+              <Smartphone className="h-4 w-4 text-yellow-400 shrink-0" />
+              <p className="text-xs text-gray-300 leading-tight">
+                We accept <span className="text-yellow-400 font-semibold">Mobile Money</span> payments nationwide
+              </p>
+            </div>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300">Quick Links</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300">
+              Quick Links
+            </h4>
             <nav className="space-y-2 text-sm">
               {[
                 { label: "About Us", href: "/about" },
@@ -94,7 +101,9 @@ export default function Footer() {
 
           {/* Customer Service */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300">Customer Service</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300">
+              Customer Service
+            </h4>
             <nav className="space-y-2 text-sm">
               {[
                 { label: "Shipping & Delivery", href: "/shipping" },
@@ -115,11 +124,13 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300">Contact Info</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300">
+              Contact Info
+            </h4>
             <address className="not-italic space-y-3 text-sm text-gray-400">
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-primary-400 shrink-0" />
-                <span>+231-888-640-502</span>
+                <span>+231-888-464-940</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-primary-400 shrink-0" />
@@ -127,7 +138,11 @@ export default function Footer() {
               </div>
               <div className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 text-primary-400 shrink-0 mt-0.5" />
-                <span>Monrovia, Liberia<br />Serving nationwide</span>
+                <span>
+                  Monrovia, Liberia
+                  <br />
+                  Serving nationwide
+                </span>
               </div>
             </address>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -88,6 +88,14 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
   const [tempImages, setTempImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
+  const blobUrlsRef = useRef([]);
+
+  // Revoke all blob URLs when the form unmounts to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   useEffect(() => {
     if (product) {
@@ -132,10 +140,12 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
     try {
       const uploadPromises = files.map(async (file) => {
         const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+        const blobUrl = URL.createObjectURL(file);
+        blobUrlsRef.current.push(blobUrl);
 
         setTempImages((prev) => [
           ...prev,
-          { url: URL.createObjectURL(file), name: fileName, status: "uploading" },
+          { url: blobUrl, name: fileName, status: "uploading" },
         ]);
 
         const fd = new FormData();
@@ -160,8 +170,13 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
       const paths = await Promise.all(uploadPromises);
       setUploadedImages((prev) => [...prev, ...paths]);
       setTempImages([]);
+      blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      blobUrlsRef.current = [];
       toast.success(`${files.length} image${files.length > 1 ? "s" : ""} uploaded`);
     } catch (error) {
+      setTempImages([]);
+      blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      blobUrlsRef.current = [];
       toast.error(`Upload failed: ${error.message}`);
     } finally {
       setUploading(false);

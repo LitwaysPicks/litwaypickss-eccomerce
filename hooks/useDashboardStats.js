@@ -29,13 +29,13 @@ export function useDashboardStats() {
       const [totalRes, pendingRes, revenueRes] = await Promise.all([
         supabase.from("orders").select("id", { count: "exact", head: true }),
         supabase.from("orders").select("id", { count: "exact", head: true }).eq("payment_status", "PENDING"),
-        supabase.from("orders").select("final_total").eq("payment_status", "COMPLETED"),
+        // Aggregate SUM server-side — avoids fetching every row just to reduce in JS
+        supabase.from("orders").select("revenue:final_total.sum()").eq("payment_status", "COMPLETED").single(),
       ]);
-      const totalRevenue = (revenueRes.data ?? []).reduce((s, o) => s + Number(o.final_total), 0);
       return {
         totalOrders: totalRes.count ?? 0,
         pendingOrders: pendingRes.count ?? 0,
-        totalRevenue,
+        totalRevenue: Number(revenueRes.data?.revenue ?? 0),
       };
     },
     staleTime: 60_000,

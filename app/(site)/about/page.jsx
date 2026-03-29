@@ -125,7 +125,8 @@ Moses combines technical expertise with a deep understanding of digital strategy
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h3>
           <p className="text-gray-700 leading-relaxed">
             To democratize access to quality products across Liberia by
-            providing a seamless, reliable, and affordable e-commerce experience.
+            providing a seamless, reliable, and affordable e-commerce
+            experience.
           </p>
         </div>
         <div className="card-elevated p-8 text-center bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
@@ -169,28 +170,6 @@ Moses combines technical expertise with a deep understanding of digital strategy
       </div>
 
       {/* Team */}
-      <div className="mb-16">
-        <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-          The Founder
-        </h2>
-        <div className="flex justify-center">
-          {team.map((member, index) => (
-            <div
-              key={index}
-              className="card-elevated p-6 text-center hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 max-w-sm"
-            >
-              <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden shadow-lg"></div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                {member.name}
-              </h3>
-              <p className="text-primary-600 font-medium mb-3">{member.role}</p>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {member.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Stats */}
       <div className="card-elevated bg-gradient-to-br from-primary-600 via-primary-700 to-orange-600 text-white p-8 mb-16 shadow-2xl">

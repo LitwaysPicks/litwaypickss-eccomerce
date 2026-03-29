@@ -1,18 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/lib/cart-context";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/currency";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 function ConfirmationContent() {
   const router = useRouter();
-  const { clearCart } = useCart();
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [order, setOrder] = useState(null);
-  const hasCleared = useRef(false);
 
   useEffect(() => {
     // Read from sessionStorage (set by CheckoutPage on successful payment)
@@ -31,19 +28,15 @@ function ConfirmationContent() {
   }, []);
 
   useEffect(() => {
-    if (!order || hasCleared.current) return;
+    if (!order) return;
 
     setPaymentStatus("success");
     toast.success("Payment successful! Thank you for your purchase.");
-    clearCart();
-    hasCleared.current = true;
-
-    // Clean up sessionStorage after reading
     sessionStorage.removeItem("lastOrder");
 
     const timer = setTimeout(() => router.push("/shop"), 8000);
     return () => clearTimeout(timer);
-  }, [order, router, clearCart]);
+  }, [order, router]);
 
   return (
     <div className="container mx-auto px-4 py-16 text-center">

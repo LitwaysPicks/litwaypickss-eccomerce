@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { deleteProductAction } from "@/app/actions/products";
 
 export const PAGE_SIZE = 20;
 
@@ -156,14 +157,7 @@ export function useProducts({ search = "", category = "", page = 0 } = {}) {
 
   // ── Delete (optimistic) ──────────────────────────────────────────────────
   const deleteProduct = useMutation({
-    mutationFn: async (productId) => {
-      await supabase.from("product_tags").delete().eq("product_id", productId);
-      const { error } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", productId);
-      if (error) throw error;
-    },
+    mutationFn: (productId) => deleteProductAction(productId),
     onMutate: async (productId) => {
       // Cancel in-flight fetches so they don't overwrite the optimistic update
       await queryClient.cancelQueries({ queryKey: ["admin-products"] });
