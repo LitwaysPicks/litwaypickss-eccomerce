@@ -288,7 +288,7 @@ export default function PrivacyPage() {
               <Shield className="h-5 w-5 text-primary-500 shrink-0" />
               <div>
                 <p className="font-semibold text-gray-900 text-sm">Email</p>
-                <p className="text-gray-600 text-sm">support@litwaypicks.com</p>
+                <p className="text-gray-600 text-sm">litwaypicks@gmail.com</p>
               </div>
             </div>
           </div>

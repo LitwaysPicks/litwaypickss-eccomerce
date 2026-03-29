@@ -166,6 +166,48 @@ export async function updatePasswordAction(newPassword) {
   revalidatePath("/", "layout");
 }
 
+/**
+ * Change password for an already-authenticated user.
+ * Unlike updatePasswordAction (recovery flow), this keeps the session alive.
+ */
+export async function changePasswordInAppAction(newPassword) {
+  if (!newPassword || newPassword.length < 8) {
+    throw new Error("Password must be at least 8 characters.");
+  }
+
+  const supabase = await createClient();
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error("Not authenticated.");
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Permanently delete the current user's account.
+ * Removes the profile row, cart, and the Supabase auth record.
+ * Uses the service-role admin client to bypass RLS for the auth deletion.
+ */
+export async function deleteAccountAction() {
+  const supabase = await createClient();
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error("Not authenticated.");
+
+  const adminSupabase = createAdminClient();
+
+  // Delete profile and cart rows first (auth record deletion won't cascade these)
+  await supabase.from("users").delete().eq("id", user.id);
+  await supabase.from("carts").delete().eq("user_id", user.id);
+
+  // Delete the auth record — this is irreversible
+  const { error } = await adminSupabase.auth.admin.deleteUser(user.id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/", "layout");
+}
+
 // ─── Profile ───────────────────────────────────────────────────────────────────
 
 /**

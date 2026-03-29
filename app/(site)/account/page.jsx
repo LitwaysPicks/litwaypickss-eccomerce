@@ -8,13 +8,19 @@ import {
   Settings,
   LogOut,
   Edit,
+  X,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/currency";
 import { useAuth } from "@/lib/auth-context";
-import { logoutAction, updateProfileAction } from "@/app/actions/auth";
+import { logoutAction, updateProfileAction, changePasswordInAppAction, deleteAccountAction } from "@/app/actions/auth";
+import { createClient } from "@/lib/supabase/client";
 import { fetchMyOrdersAction } from "@/app/actions/orders";
 import { queryClient } from "@/lib/queryClient";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -36,6 +42,21 @@ function AccountContent() {
     staleTime: 60_000,
   });
   const [isEditing, setIsEditing] = useState(false);
+
+  // Security modals
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
+
+  // Change password form
+  const [pwForm, setPwForm] = useState({ newPassword: "", confirm: "" });
+  const [showPw, setShowPw] = useState(false);
+
+  // Delete account confirmation
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+
+  // 2FA enrollment state
+  const [mfaState, setMfaState] = useState({ qrCode: "", secret: "", factorId: "", code: "", enrolled: false });
   const [userInfo, setUserInfo] = useState({
     firstName: "",
     lastName: "",
@@ -89,6 +110,61 @@ function AccountContent() {
     },
     onError: () => toast.error("Logout failed"),
   });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: () => changePasswordInAppAction(pwForm.newPassword),
+    onSuccess: () => {
+      toast.success("Password updated successfully!");
+      setShowChangePassword(false);
+      setPwForm({ newPassword: "", confirm: "" });
+    },
+    onError: (err) => toast.error(err.message || "Failed to update password"),
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: deleteAccountAction,
+    onSuccess: () => {
+      queryClient.clear();
+      router.push("/");
+    },
+    onError: (err) => toast.error(err.message || "Failed to delete account"),
+  });
+
+  const handleChangePassword = () => {
+    if (pwForm.newPassword.length < 8) return toast.error("Password must be at least 8 characters.");
+    if (pwForm.newPassword !== pwForm.confirm) return toast.error("Passwords do not match.");
+    changePasswordMutation.mutate();
+  };
+
+  const handleDeleteAccount = () => {
+    if (deleteConfirm !== "DELETE") return toast.error('Type "DELETE" to confirm.');
+    deleteAccountMutation.mutate();
+  };
+
+  const handleStart2FA = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+    if (error) return toast.error(error.message);
+    setMfaState((prev) => ({
+      ...prev,
+      qrCode: data.totp.qr_code,
+      secret: data.totp.secret,
+      factorId: data.id,
+    }));
+    setShowTwoFactor(true);
+  };
+
+  const handleVerify2FA = async () => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: mfaState.factorId,
+      code: mfaState.code,
+    });
+    if (error) return toast.error("Invalid code — please try again.");
+    setMfaState((prev) => ({ ...prev, enrolled: true }));
+    toast.success("Two-factor authentication enabled!");
+    setShowTwoFactor(false);
+  };
 
   const handleSave = () => updateProfileMutation.mutate(userInfo);
   const handleLogout = () => logoutMutation.mutate();
@@ -340,15 +416,24 @@ function AccountContent() {
                 <div className="card p-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Security</h2>
                   <div className="space-y-4">
-                    <button className="w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <button
+                      onClick={() => setShowChangePassword(true)}
+                      className="w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                    >
                       <h3 className="font-medium text-gray-900 mb-1">Change Password</h3>
                       <p className="text-sm text-gray-600">Update your account password</p>
                     </button>
-                    <button className="w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <button
+                      onClick={handleStart2FA}
+                      className="w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                    >
                       <h3 className="font-medium text-gray-900 mb-1">Two-Factor Authentication</h3>
-                      <p className="text-sm text-gray-600">Add an extra layer of security</p>
+                      <p className="text-sm text-gray-600">Add an extra layer of security via authenticator app</p>
                     </button>
-                    <button className="w-full text-left p-4 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-red-600">
+                    <button
+                      onClick={() => setShowDeleteAccount(true)}
+                      className="w-full text-left p-4 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-red-600"
+                    >
                       <h3 className="font-medium mb-1">Delete Account</h3>
                       <p className="text-sm">Permanently delete your account and data</p>
                     </button>
@@ -359,6 +444,158 @@ function AccountContent() {
           </div>
         </div>
       </div>
+
+      {/* ── Change Password Modal ─────────────────────────────────────────── */}
+      {showChangePassword && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Change Password</h3>
+              <button onClick={() => { setShowChangePassword(false); setPwForm({ newPassword: "", confirm: "" }); }} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={pwForm.newPassword}
+                  onChange={(e) => setPwForm((p) => ({ ...p, newPassword: e.target.value }))}
+                  className="input pr-10"
+                  placeholder="Min. 8 characters"
+                />
+                <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-3 top-8 text-gray-400 hover:text-gray-600">
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={pwForm.confirm}
+                  onChange={(e) => setPwForm((p) => ({ ...p, confirm: e.target.value }))}
+                  className="input"
+                  placeholder="Repeat new password"
+                />
+              </div>
+              {pwForm.confirm && pwForm.newPassword !== pwForm.confirm && (
+                <p className="text-sm text-red-500">Passwords do not match</p>
+              )}
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleChangePassword}
+                disabled={changePasswordMutation.isPending}
+                className="btn btn-primary flex-1 disabled:opacity-50"
+              >
+                {changePasswordMutation.isPending ? "Updating…" : "Update Password"}
+              </button>
+              <button onClick={() => { setShowChangePassword(false); setPwForm({ newPassword: "", confirm: "" }); }} className="btn btn-outline px-5">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 2FA Enrollment Modal ─────────────────────────────────────────────── */}
+      {showTwoFactor && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Two-Factor Authentication</h3>
+              </div>
+              <button onClick={() => setShowTwoFactor(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
+              {mfaState.qrCode && (
+                <div className="flex justify-center">
+                  <img src={mfaState.qrCode} alt="2FA QR Code" className="w-48 h-48 border rounded-lg p-2" />
+                </div>
+              )}
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-1">Manual entry key:</p>
+                <p className="font-mono text-sm text-gray-800 break-all">{mfaState.secret}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Enter the 6-digit code from your app</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={mfaState.code}
+                  onChange={(e) => setMfaState((p) => ({ ...p, code: e.target.value.replace(/\D/g, "") }))}
+                  className="input text-center text-lg tracking-[0.5em] font-mono"
+                  placeholder="000000"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleVerify2FA}
+                disabled={mfaState.code.length !== 6}
+                className="btn btn-primary flex-1 disabled:opacity-50"
+              >
+                Verify & Enable
+              </button>
+              <button onClick={() => setShowTwoFactor(false)} className="btn btn-outline px-5">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Account Confirmation Modal ────────────────────────────────── */}
+      {showDeleteAccount && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                <h3 className="text-lg font-semibold">Delete Account</h3>
+              </div>
+              <button onClick={() => { setShowDeleteAccount(false); setDeleteConfirm(""); }} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-red-700 font-medium">This action is permanent and cannot be undone.</p>
+              <p className="text-sm text-red-600 mt-1">Your profile, order history, and all data will be deleted.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Type <span className="font-mono font-bold">DELETE</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                className="input"
+                placeholder="DELETE"
+              />
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirm !== "DELETE" || deleteAccountMutation.isPending}
+                className="btn flex-1 bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleteAccountMutation.isPending ? "Deleting…" : "Delete My Account"}
+              </button>
+              <button onClick={() => { setShowDeleteAccount(false); setDeleteConfirm(""); }} className="btn btn-outline px-5">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
