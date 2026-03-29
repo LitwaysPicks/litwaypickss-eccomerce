@@ -199,8 +199,8 @@ export default function ShopContent({
                 className="w-full accent-primary-600"
               />
               <div className="flex justify-between text-sm text-gray-600 mt-1">
-                <span>LRD 0</span>
-                <span>LRD {localMaxPrice}</span>
+                <span>$0</span>
+                <span>${localMaxPrice}</span>
               </div>
             </div>
 
@@ -284,7 +284,7 @@ export default function ShopContent({
               )}
               {(params.maxPrice ?? 500) < 500 && (
                 <span className="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                  Up to LRD {params.maxPrice}
+                  Up to ${params.maxPrice}
                   <button
                     onClick={() => { setLocalMaxPrice(500); navigate({ maxPrice: undefined }); }}
                     className="ml-2 hover:text-blue-900"

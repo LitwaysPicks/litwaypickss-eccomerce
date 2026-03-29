@@ -322,7 +322,7 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block mb-1.5 text-xs font-medium text-gray-600">Price (LRD) <span className="text-rose-500">*</span></label>
+                  <label className="block mb-1.5 text-xs font-medium text-gray-600">Price (USD) <span className="text-rose-500">*</span></label>
                   <input
                     type="number"
                     name="price"
@@ -337,7 +337,7 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
                 </div>
 
                 <div>
-                  <label className="block mb-1.5 text-xs font-medium text-gray-600">Sale price (LRD)</label>
+                  <label className="block mb-1.5 text-xs font-medium text-gray-600">Sale price (USD)</label>
                   <input
                     type="number"
                     name="salePrice"

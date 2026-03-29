@@ -44,6 +44,7 @@
   --animate-fade-in: fadeIn 0.5s ease-in-out;
   --animate-slide-up: slideUp 0.3s ease-out;
   --animate-bounce-gentle: bounceGentle 2s infinite;
+  --animate-wiggle: wiggle 1.2s ease-in-out infinite;
 
   /* Keyframes */
   @keyframes fadeIn {
@@ -76,6 +77,14 @@
     }
   }
 
+  @keyframes wiggle {
+    0%, 50%, 100% { transform: rotate(0deg); }
+    10%           { transform: rotate(14deg); }
+    20%           { transform: rotate(-10deg); }
+    30%           { transform: rotate(8deg); }
+    40%           { transform: rotate(-4deg); }
+  }
+
   @keyframes slideProgress {
     from {
       width: 0%;
@@ -83,6 +92,12 @@
     to {
       width: 100%;
     }
+  }
+}
+
+@layer utilities {
+  .animate-wiggle {
+    animation: wiggle 1.2s ease-in-out infinite;
   }
 }
 
@@ -96,7 +111,7 @@
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-white;
+  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-white;
 }
 
 @utility btn-primary {
@@ -112,11 +127,11 @@
 }
 
 @utility card {
-  @apply rounded-xl border border-gray-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300;
+  @apply rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow duration-200;
 }
 
 @utility card-elevated {
-  @apply rounded-xl border border-gray-200 bg-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1;
+  @apply rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200;
 }
 
 @utility input {

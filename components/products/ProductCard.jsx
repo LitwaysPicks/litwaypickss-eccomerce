@@ -55,7 +55,7 @@ export default function ProductCard({ product }) {
 
   return (
     <div
-      className="group cursor-pointer overflow-hidden card-elevated border-0 bg-white transition-all duration-500"
+      className="group cursor-pointer overflow-hidden card bg-white"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -66,98 +66,96 @@ export default function ProductCard({ product }) {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
 
           {discountPercentage > 0 && (
-            <span className="absolute top-3 left-3 bg-linear-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+            <span className="absolute top-3 left-3 bg-red-500 text-white px-2 py-0.5 rounded text-xs font-semibold">
               -{discountPercentage}%
             </span>
           )}
 
           {isOutOfStock && (
-            <span className="absolute top-3 right-3 bg-gray-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
+            <span className="absolute top-3 right-3 bg-gray-700 text-white px-2 py-0.5 rounded text-xs font-medium">
               Out of Stock
             </span>
           )}
 
           {product.featured && !isOutOfStock && (
-            <span className="absolute top-3 right-3 bg-linear-to-r from-primary-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-              ⭐ FEATURED
+            <span className="absolute top-3 right-3 bg-primary-600 text-white px-2 py-0.5 rounded text-xs font-semibold">
+              Featured
             </span>
           )}
 
           <div
-            className={`absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity duration-500 ${
+            className={`absolute inset-0 bg-black/25 flex items-center justify-center transition-opacity duration-300 ${
               isHovered ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div className="flex space-x-3">
+            <div className="flex gap-2">
               <button
                 onClick={handleWishlist}
                 aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                className="rounded-full w-12 h-12 bg-white/95 hover:bg-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg"
+                className="w-10 h-10 bg-white hover:bg-gray-50 rounded-md flex items-center justify-center transition-colors shadow-sm"
               >
-                <Heart className={`h-5 w-5 ${inWishlist ? "fill-red-500 text-red-500" : "text-gray-700"}`} />
+                <Heart className={`h-4 w-4 ${inWishlist ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
               </button>
               <button
                 onClick={handleAddToCart}
                 aria-label="Add to cart"
                 disabled={isOutOfStock}
-                className="rounded-full w-12 h-12 bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 disabled:opacity-50 shadow-lg"
+                className="w-10 h-10 bg-primary-600 hover:bg-primary-700 text-white rounded-md flex items-center justify-center transition-colors shadow-sm disabled:opacity-50"
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-4 w-4" />
               </button>
             </div>
           </div>
         </div>
 
-        <div className="p-5 space-y-3">
-          <p className="text-xs text-primary-600 uppercase tracking-wide font-semibold">
+        <div className="p-3 md:p-5 space-y-1.5 md:space-y-3">
+          <p className="text-[10px] md:text-xs text-gray-400 truncate">
             {categoryName}
           </p>
 
-          <h3 className="font-semibold text-gray-900 line-clamp-2 min-h-10 group-hover:text-primary-700 transition-colors">
+          <h3 className="font-medium text-sm md:text-base text-gray-900 line-clamp-2 leading-snug">
             {product.name}
           </h3>
 
           {product.review_count > 0 && product.rating && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-1">
               <div className="flex">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-4 w-4 ${
+                    className={`h-3 w-3 md:h-3.5 md:w-3.5 ${
                       i < Math.floor(product.rating)
-                        ? "text-yellow-400 fill-current"
-                        : "text-gray-300"
+                        ? "text-amber-400 fill-current"
+                        : "text-gray-200 fill-current"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-sm text-gray-600 font-medium">
+              <span className="text-[10px] md:text-xs text-gray-500">
                 ({product.review_count})
               </span>
             </div>
           )}
 
-          <div className="flex items-center space-x-2">
-            <span className="font-bold text-xl text-gray-900">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="font-bold text-sm md:text-lg text-gray-900">
               {formatCurrency(product.sale_price || product.price)}
             </span>
             {product.sale_price && (
-              <span className="text-sm text-gray-500 line-through">
+              <span className="text-xs text-gray-400 line-through">
                 {formatCurrency(product.price)}
               </span>
             )}
           </div>
 
           {product.stock > 0 && product.stock <= 5 && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-1">
-              <p className="text-xs text-orange-700 font-medium">
-                ⚡ Only {product.stock} left in stock
-              </p>
-            </div>
+            <p className="text-[10px] md:text-xs text-orange-600 font-medium">
+              Only {product.stock} left
+            </p>
           )}
         </div>
       </Link>

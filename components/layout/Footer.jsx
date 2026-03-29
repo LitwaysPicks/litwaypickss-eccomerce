@@ -33,9 +33,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2 group">
-              <ShoppingCart className="h-7 w-7 text-primary-500" />
-              <span className="text-2xl font-extrabold text-primary-500 tracking-tight group-hover:tracking-wider transition-all">
+            <Link href="/" className="flex items-center gap-1.5">
+              <ShoppingCart className="h-6 w-6 text-primary-500" />
+              <span className="text-xl font-bold text-white">
                 LitwayPicks
               </span>
             </Link>
@@ -68,14 +68,10 @@ export default function Footer() {
             </div>
 
             {/* Payment badge */}
-            <div className="flex items-center gap-2 mt-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 w-fit">
-              <Smartphone className="h-4 w-4 text-yellow-400 shrink-0" />
-              <p className="text-xs text-gray-300 leading-tight">
-                We accept{" "}
-                <span className="text-yellow-400 font-semibold">
-                  Mobile Money
-                </span>{" "}
-                payments nationwide
+            <div className="flex items-center gap-2 mt-2 rounded-md border border-gray-700 bg-gray-800 px-3 py-2 w-fit">
+              <Smartphone className="h-4 w-4 text-gray-400 shrink-0" />
+              <p className="text-xs text-gray-400 leading-tight">
+                We accept <span className="text-gray-200 font-medium">Mobile Money</span> payments
               </p>
             </div>
           </div>
@@ -133,15 +129,15 @@ export default function Footer() {
             </h4>
             <address className="not-italic space-y-3 text-sm text-gray-400">
               <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-primary-400 shrink-0" />
+                <Phone className="h-4 w-4 text-gray-500 shrink-0" />
                 <span>+231-888-464-940</span>
               </div>
               <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-primary-400 shrink-0" />
+                <Mail className="h-4 w-4 text-gray-500 shrink-0" />
                 <span>litwaypicks@gmail.com</span>
               </div>
               <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-primary-400 shrink-0 mt-0.5" />
+                <MapPin className="h-4 w-4 text-gray-500 shrink-0 mt-0.5" />
                 <span>
                   Monrovia, Liberia
                   <br />
