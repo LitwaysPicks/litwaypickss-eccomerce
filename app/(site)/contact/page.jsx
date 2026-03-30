@@ -50,7 +50,6 @@ export default function ContactPage() {
       icon: MapPin,
       title: "Address",
       details: "Monrovia, Liberia",
-      description: "Serving all 15 counties nationwide",
     },
   ];
 
