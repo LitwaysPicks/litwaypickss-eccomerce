@@ -28,7 +28,7 @@ export async function fetchMyOrdersAction() {
     .select(
       "id, external_id, created_at, final_total, payment_status, items, delivery_city, delivery_state, customer_first_name, customer_last_name",
     )
-    .eq("customer_email", user.email)
+    .ilike("customer_email", user.email)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);

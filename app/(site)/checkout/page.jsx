@@ -214,6 +214,9 @@ function CheckoutContent() {
           name: item.name,
           price: item.sale_price || item.price,
           quantity: item.quantity,
+          ...(item.selectedSize ? { size: item.selectedSize } : {}),
+          ...(item.selectedColor ? { color: item.selectedColor } : {}),
+          variant: [item.selectedSize, item.selectedColor].filter(Boolean).join(" / ") || undefined,
         })),
         userInfo: {
           firstName: formData.firstName,
@@ -514,6 +517,11 @@ function CheckoutContent() {
                   />
                   <div className="flex-1">
                     <h4 className="font-medium">{item.name}</h4>
+                    {(item.selectedSize || item.selectedColor) && (
+                      <p className="text-xs text-gray-500">
+                        {[item.selectedSize, item.selectedColor].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
                     <p className="text-sm text-gray-600">
                       Qty: {item.quantity}
                     </p>

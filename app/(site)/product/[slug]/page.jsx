@@ -1,12 +1,14 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Star, Truck, Shield, RotateCcw } from "lucide-react";
+import { Star, Truck, Shield, RotateCcw, Tag } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatCurrency } from "@/lib/currency";
 import ProductCard from "@/components/products/ProductCard";
 import ProductGallery from "@/components/products/ProductGallery";
 import ProductActions from "@/components/products/ProductActions";
+import ProductReviews from "@/components/products/ProductReviews";
 
 const FALLBACK_IMAGE =
   "https://images.pexels.com/photos/5632396/pexels-photo-5632396.jpeg?auto=compress&cs=tinysrgb&w=600";
@@ -63,21 +65,59 @@ export default async function ProductPage({ params }) {
 
   const product = { ...productData, images: productData.image_urls ?? [] };
 
-  const { data: related } = await supabase
-    .from("products")
-    .select("*")
-    .eq("category_slug", product.category_slug)
-    .neq("id", product.id)
-    .limit(4);
+  // Fetch related products and reviews in parallel
+  const admin = createAdminClient();
+  const [relatedResult, reviewsResult] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*")
+      .eq("category_slug", product.category_slug)
+      .neq("id", product.id)
+      .limit(4),
+    admin
+      .from("reviews")
+      .select("id, rating, comment, created_at, user_id")
+      .eq("product_id", product.id)
+      .order("created_at", { ascending: false }),
+  ]);
 
-  const relatedProducts = (related ?? []).map((item) => ({
+  const relatedProducts = (relatedResult.data ?? []).map((item) => ({
     ...item,
     images: item.image_urls ?? [],
   }));
 
+  // Attach reviewer display names
+  const rawReviews = reviewsResult.data ?? [];
+  let reviews = rawReviews;
+  if (rawReviews.length > 0) {
+    const userIds = [...new Set(rawReviews.map((r) => r.user_id))];
+    const { data: profiles } = await admin
+      .from("profiles")
+      .select("id, first_name, last_name")
+      .in("id", userIds);
+    const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
+    reviews = rawReviews.map((r) => {
+      const p = profileMap[r.user_id];
+      return {
+        ...r,
+        displayName: p
+          ? `${p.first_name ?? ""} ${p.last_name?.[0] ?? ""}.`.trim()
+          : "Customer",
+      };
+    });
+  }
+
   const discountPercentage = product.sale_price
     ? Math.round(((product.price - product.sale_price) / product.price) * 100)
     : 0;
+
+  const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+  const colors = Array.isArray(product.colors) ? product.colors : [];
+  const keywords = Array.isArray(product.keywords)
+    ? product.keywords
+    : typeof product.keywords === "string"
+    ? product.keywords.split(",").map((k) => k.trim()).filter(Boolean)
+    : [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -95,7 +135,7 @@ export default async function ProductPage({ params }) {
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-        {/* Image gallery — client component for selection state */}
+        {/* Image gallery */}
         <ProductGallery
           images={product.images}
           videoUrl={product.video_url}
@@ -108,6 +148,7 @@ export default async function ProductPage({ params }) {
           <p className="text-sm text-gray-500 uppercase tracking-wide">{product.brand}</p>
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
 
+          {/* Rating summary */}
           {product.review_count > 0 && (
             <div className="flex items-center space-x-2">
               <div className="flex">
@@ -123,11 +164,12 @@ export default async function ProductPage({ params }) {
                 ))}
               </div>
               <span className="text-sm text-gray-600">
-                {product.rating} ({product.review_count} reviews)
+                {product.rating} ({product.review_count} review{product.review_count !== 1 ? "s" : ""})
               </span>
             </div>
           )}
 
+          {/* Price */}
           <div className="flex items-center space-x-3">
             <span className="text-3xl font-bold text-gray-900">
               {formatCurrency(product.sale_price || product.price)}
@@ -137,17 +179,52 @@ export default async function ProductPage({ params }) {
                 {formatCurrency(product.price)}
               </span>
             )}
+            {discountPercentage > 0 && (
+              <span className="text-sm font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                {discountPercentage}% off
+              </span>
+            )}
           </div>
 
+          {/* Description */}
           <p className="text-gray-700 leading-relaxed">{product.description}</p>
 
+          {/* Stock */}
           <p className={`font-medium ${product.stock > 0 ? "text-green-600" : "text-red-600"}`}>
             {product.stock > 0
               ? `✓ In Stock (${product.stock} available)`
               : "✗ Out of Stock"}
           </p>
 
-          {/* Quantity + Cart + Wishlist — client component */}
+          {/* Category */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium text-gray-700">Category:</span>
+            <Link
+              href={`/shop/${product.category_slug}`}
+              className="text-primary-600 hover:underline"
+            >
+              {product.category_name || formatCategorySlug(product.category_slug)}
+            </Link>
+          </div>
+
+          {/* Keywords / Tags */}
+          {keywords.length > 0 && (
+            <div className="flex items-start gap-2">
+              <Tag className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+              <div className="flex flex-wrap gap-1.5">
+                {keywords.map((kw) => (
+                  <span
+                    key={kw}
+                    className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+                  >
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Variant selectors + Add to Cart */}
           <ProductActions product={product} />
 
           <div className="border-t pt-6 space-y-4">
@@ -167,8 +244,16 @@ export default async function ProductPage({ params }) {
         </div>
       </div>
 
+      {/* Reviews */}
+      <ProductReviews
+        reviews={reviews}
+        averageRating={product.rating ?? 0}
+        reviewCount={product.review_count ?? 0}
+      />
+
+      {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <section>
+        <section className="mt-16">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((item) => (

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendOrderCompletedEmails, sendOrderRefundedEmails } from "@/lib/email";
+import { sendOrderCompletedEmails, sendOrderFailedEmails, sendOrderRefundedEmails } from "@/lib/email";
+import { createAdminNotification } from "@/lib/notifications";
 
 /**
  * PATCH /api/orders/[id]/status
@@ -53,14 +54,37 @@ export async function PATCH(request, { params }) {
     if (order.customer_email) {
       const updatedOrder = { ...order, payment_status: status };
 
+      const name = `${order.customer_first_name} ${order.customer_last_name}`.trim();
       if (status === "COMPLETED") {
         sendOrderCompletedEmails(updatedOrder).catch((err) =>
           console.error("Order completed email error:", err.message)
         );
+        createAdminNotification({
+          type: "order_placed",
+          title: "Order Completed",
+          message: `Order ${order.external_id} for ${name} marked as completed.`,
+          data: { order_id: order.id, external_id: order.external_id },
+        });
       } else if (status === "REFUNDED") {
         sendOrderRefundedEmails(updatedOrder).catch((err) =>
           console.error("Order refunded email error:", err.message)
         );
+        createAdminNotification({
+          type: "order_failed",
+          title: "Order Refunded",
+          message: `Order ${order.external_id} for ${name} has been refunded.`,
+          data: { order_id: order.id, external_id: order.external_id },
+        });
+      } else if (status === "FAILED") {
+        sendOrderFailedEmails(updatedOrder).catch((err) =>
+          console.error("Order failed email error:", err.message)
+        );
+        createAdminNotification({
+          type: "order_failed",
+          title: "Order Marked Failed",
+          message: `Order ${order.external_id} for ${name} was marked as failed.`,
+          data: { order_id: order.id, external_id: order.external_id },
+        });
       }
     }
 

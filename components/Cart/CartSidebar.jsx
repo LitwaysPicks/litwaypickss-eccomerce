@@ -63,82 +63,88 @@ export default function CartSidebar() {
               </div>
             ) : (
               <div className="space-y-4">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex space-x-4 p-4 border rounded-lg"
-                  >
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
-                        src={
-                          item.images?.[0] ||
-                          "https://images.pexels.com/photos/5632396/pexels-photo-5632396.jpeg"
-                        }
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    <div className="flex-1 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-medium text-gray-900 text-sm line-clamp-2">
-                          {item.name}
-                        </h3>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="text-gray-400 hover:text-red-500 transition-colors ml-2"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                {items.map((item) => {
+                  const key = item.cartKey ?? item.id;
+                  return (
+                    <div
+                      key={key}
+                      className="flex space-x-4 p-4 border rounded-lg"
+                    >
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                        <img
+                          src={
+                            item.images?.[0] ||
+                            "https://images.pexels.com/photos/5632396/pexels-photo-5632396.jpeg"
+                          }
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
-                            }
-                            disabled={item.quantity <= 1}
-                            className="w-6 h-6 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-8 text-center text-sm font-medium">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
-                            }
-                            disabled={item.quantity >= item.stock}
-                            className="w-6 h-6 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-900 text-sm">
-                            {formatCurrency(
-                              (item.salePrice || item.price) * item.quantity,
+                      <div className="flex-1 space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium text-gray-900 text-sm line-clamp-2">
+                              {item.name}
+                            </h3>
+                            {(item.selectedSize || item.selectedColor) && (
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {[item.selectedSize, item.selectedColor].filter(Boolean).join(" · ")}
+                              </p>
                             )}
-                          </p>
-                          {item.salePrice && (
-                            <p className="text-xs text-gray-500 line-through">
-                              {formatCurrency(item.price * item.quantity)}
-                            </p>
-                          )}
+                          </div>
+                          <button
+                            onClick={() => removeItem(key)}
+                            className="text-gray-400 hover:text-red-500 transition-colors ml-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
-                      </div>
 
-                      {item.quantity >= item.stock && (
-                        <p className="text-xs text-orange-600">
-                          Maximum quantity reached
-                        </p>
-                      )}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => updateQuantity(key, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                              className="w-6 h-6 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="w-8 text-center text-sm font-medium">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => updateQuantity(key, item.quantity + 1)}
+                              disabled={item.quantity >= item.stock}
+                              className="w-6 h-6 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900 text-sm">
+                              {formatCurrency(
+                                (item.sale_price || item.price) * item.quantity,
+                              )}
+                            </p>
+                            {item.sale_price && (
+                              <p className="text-xs text-gray-500 line-through">
+                                {formatCurrency(item.price * item.quantity)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {item.quantity >= item.stock && (
+                          <p className="text-xs text-orange-600">
+                            Maximum quantity reached
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

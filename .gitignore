@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+supabase/migrations/20260330000000_create_reviews.sql
+supabase/migrations/20260330000001_create_admin_notifications.sql
