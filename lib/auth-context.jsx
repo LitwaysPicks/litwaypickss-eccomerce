@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
     queryKey: ["auth-user"],
     queryFn: fetchAuthUser,
     staleTime: Infinity, // never refetch on window focus — auth state is
-    retry: false,        // driven by onAuthStateChange subscription below
+    retry: 1,            // driven by onAuthStateChange subscription below
   });
 
   const authData = query.data;
