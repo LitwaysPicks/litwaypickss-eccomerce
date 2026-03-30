@@ -35,3 +35,51 @@ export async function fetchMyOrdersAction() {
   console.log("Fetched orders for", user.email, data);
   return data ?? [];
 }
+
+/**
+ * Given the items array from a failed order, checks the products table
+ * and returns two lists:
+ *  - available: products that still exist and have stock > 0
+ *  - unavailable: item names that are gone or out of stock
+ *
+ * Each available product is returned with current DB data (price, stock, images)
+ * and the original quantity the customer ordered.
+ */
+export async function retryOrderItemsAction(orderItems) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error("Not authenticated.");
+
+  if (!Array.isArray(orderItems) || orderItems.length === 0) {
+    return { available: [], unavailable: [] };
+  }
+
+  const ids = orderItems.map((i) => i.id).filter(Boolean);
+
+  const admin = createAdminClient();
+  const { data: products, error } = await admin
+    .from("products")
+    .select("id, name, slug, price, sale_price, stock, image_urls")
+    .in("id", ids);
+
+  if (error) throw new Error(error.message);
+
+  const productMap = new Map((products ?? []).map((p) => [p.id, p]));
+
+  const available = [];
+  const unavailable = [];
+
+  for (const item of orderItems) {
+    const product = productMap.get(item.id);
+    if (!product || product.stock <= 0) {
+      unavailable.push(item.name || "Unknown item");
+    } else {
+      available.push({
+        ...product,
+        quantity: Math.min(item.quantity ?? 1, product.stock),
+      });
+    }
+  }
+
+  return { available, unavailable };
+}

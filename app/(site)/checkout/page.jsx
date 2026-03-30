@@ -106,8 +106,13 @@ function CheckoutContent() {
             duration: 3000,
           });
 
-          const { formData: fd, finalTotal: ft, orderId: oid, clearCart: cc, router: r } =
-            latestRef.current;
+          const {
+            formData: fd,
+            finalTotal: ft,
+            orderId: oid,
+            clearCart: cc,
+            router: r,
+          } = latestRef.current;
 
           cc();
 
@@ -395,7 +400,7 @@ function CheckoutContent() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    placeholder="Phone (0880555511)"
+                    placeholder="Mobile Money Number"
                     className="input font-mono"
                     disabled={loading}
                   />
@@ -498,7 +503,10 @@ function CheckoutContent() {
                   className="flex space-x-4 pb-4 border-b last:border-0"
                 >
                   <Image
-                    src={item.images?.[0] || "https://images.pexels.com/photos/5632396/pexels-photo-5632396.jpeg?auto=compress&cs=tinysrgb&w=80"}
+                    src={
+                      item.images?.[0] ||
+                      "https://images.pexels.com/photos/5632396/pexels-photo-5632396.jpeg?auto=compress&cs=tinysrgb&w=80"
+                    }
                     alt={item.name}
                     width={80}
                     height={80}
