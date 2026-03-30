@@ -70,6 +70,9 @@ export default function Hero() {
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [progressKey, setProgressKey] = useState(0);
+  // Only render images for the active slide + the next slide so we never
+  // download all 4 hero images on page load (1920×1080 each).
+  const nextIndex = (current + 1) % heroSlides.length;
 
   const advance = useCallback(() => {
     setCurrent((prev) => (prev + 1) % heroSlides.length);
@@ -106,14 +109,16 @@ export default function Hero() {
               aria-hidden={!isActive}
             >
               <div className="relative h-full">
-                <Image
-                  src={slide.image}
-                  alt={slide.title}
-                  fill
-                  sizes="100vw"
-                  priority={index === 0}
-                  className="object-cover"
-                />
+                {(index === current || index === nextIndex) && (
+                  <Image
+                    src={slide.image}
+                    alt={slide.title}
+                    fill
+                    sizes="100vw"
+                    priority={index === 0}
+                    className="object-cover"
+                  />
+                )}
                 <div className="absolute inset-0 bg-black/55" />
 
                 <div className="absolute inset-0 z-20 flex items-center justify-center px-4 py-10">

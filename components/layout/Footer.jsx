@@ -35,9 +35,7 @@ export default function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-1.5">
               <ShoppingCart className="h-6 w-6 text-primary-500" />
-              <span className="text-xl font-bold text-white">
-                LitwayPicks
-              </span>
+              <span className="text-xl font-bold text-white">LitwayPicks</span>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed">
               Liberia's premier e-commerce platform offering quality products
@@ -71,7 +69,9 @@ export default function Footer() {
             <div className="flex items-center gap-2 mt-2 rounded-md border border-gray-700 bg-gray-800 px-3 py-2 w-fit">
               <Smartphone className="h-4 w-4 text-gray-400 shrink-0" />
               <p className="text-xs text-gray-400 leading-tight">
-                We accept <span className="text-gray-200 font-medium">Mobile Money</span> payments
+                We accept{" "}
+                <span className="text-gray-200 font-medium">Mobile Money</span>{" "}
+                payments
               </p>
             </div>
           </div>
@@ -86,7 +86,6 @@ export default function Footer() {
                 { label: "About Us", href: "/about" },
                 { label: "Contact Us", href: "/contact" },
                 { label: "Shop", href: "/shop" },
-                { label: "Track Order", href: "/track-order" },
               ].map(({ label, href }) => (
                 <Link
                   key={href}
