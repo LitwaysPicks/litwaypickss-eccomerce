@@ -13,7 +13,7 @@ import { deleteProductAction } from "@/app/actions/products";
 export const PAGE_SIZE = 20;
 
 const PRODUCT_FIELDS =
-  "id,name,slug,price,sale_price,stock,featured,category_slug,brand,rating,review_count,image_urls,category_name";
+  "id,name,slug,price,sale_price,stock,featured,category_slug,brand,rating,review_count,image_urls,category_name,sizes,colors";
 
 async function fetchProducts({ search, category, page }) {
   let query = supabase
