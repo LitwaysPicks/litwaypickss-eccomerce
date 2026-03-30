@@ -35,11 +35,15 @@ export function useOrders({ status = "", search = "", page = 0 } = {}) {
 
   const updateStatus = useMutation({
     mutationFn: async ({ orderId, status }) => {
-      const { error } = await supabase
-        .from("orders")
-        .update({ payment_status: status, updated_at: new Date().toISOString() })
-        .eq("id", orderId);
-      if (error) throw error;
+      const res = await fetch(`/api/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "Failed to update order");
+      }
     },
     onSuccess: () => {
       toast.success("Order status updated");

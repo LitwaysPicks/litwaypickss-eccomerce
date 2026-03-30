@@ -6,9 +6,12 @@ import { formatCurrency } from "@/lib/currency";
 import Pagination from "@/components/Admin/Pagination";
 import OrderDetailPanel from "@/components/Admin/Orders/OrderDetailPanel";
 
-const STATUSES = ["", "PENDING", "COMPLETED", "FAILED", "REFUNDED"];
-const STATUS_LABELS = { "": "All", PENDING: "Pending", COMPLETED: "Completed", FAILED: "Failed", REFUNDED: "Refunded" };
+// SUCCESSFUL = MoMo payment confirmed, awaiting fulfilment
+// COMPLETED  = order fulfilled/delivered by admin
+const STATUSES = ["", "PENDING", "SUCCESSFUL", "COMPLETED", "FAILED", "REFUNDED"];
+const STATUS_LABELS = { "": "All", PENDING: "Pending", SUCCESSFUL: "Paid", COMPLETED: "Completed", FAILED: "Failed", REFUNDED: "Refunded" };
 const STATUS_STYLES = {
+  SUCCESSFUL: "bg-blue-100 text-blue-700",
   COMPLETED: "bg-green-100 text-green-700",
   PENDING: "bg-orange-100 text-orange-700",
   FAILED: "bg-red-100 text-red-700",
@@ -27,8 +30,6 @@ export default function OrdersPage() {
     return () => clearTimeout(t);
   }, [searchQuery]);
 
-  useEffect(() => { setPage(0); }, [status]);
-
   const { orders, totalCount, pageCount, isLoading, isFetching, updateStatus } = useOrders({
     status, search: debouncedSearch, page,
   });
@@ -41,7 +42,7 @@ export default function OrdersPage() {
           {STATUSES.map((s) => (
             <button
               key={s}
-              onClick={() => setStatus(s)}
+              onClick={() => { setStatus(s); setPage(0); }}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                 status === s
                   ? "bg-secondary-900 text-white shadow-sm"
