@@ -35,7 +35,7 @@ function AccountContent() {
   const { addItem: addToCart } = useCart();
   const [activeTab, setActiveTab] = useState("profile");
 
-  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+  const { data: orders = [], isLoading: ordersLoading, isError: ordersError } = useQuery({
     queryKey: ["my-orders", user?.email],
     queryFn: fetchMyOrdersAction,
     enabled: !!user?.email && activeTab === "orders",
@@ -294,6 +294,12 @@ function AccountContent() {
                         <div className="h-3 bg-gray-100 rounded w-1/2" />
                       </div>
                     ))}
+                  </div>
+                ) : ordersError ? (
+                  <div className="text-center py-8">
+                    <Package className="h-12 w-12 text-red-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Could not load orders</h3>
+                    <p className="text-gray-600">Please try refreshing the page.</p>
                   </div>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-8">
