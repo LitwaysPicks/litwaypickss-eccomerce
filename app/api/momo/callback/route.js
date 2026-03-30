@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendOrderPlacedEmails } from "@/lib/email";
 import crypto from "crypto";
 
 /**
@@ -72,7 +73,14 @@ export async function POST(request) {
       : `reference_id.eq.${transactionId}`;
 
     switch (status) {
-      case "SUCCESSFUL":
+      case "SUCCESSFUL": {
+        // Fetch current order to check if email already sent (dedup with status polling)
+        const { data: existingOrder } = await db
+          .from("orders")
+          .select("*")
+          .or(filter)
+          .maybeSingle();
+
         await db.from("orders").update({
           payment_status: "SUCCESSFUL",
           payment_confirmed_at: new Date().toISOString(),
@@ -81,12 +89,27 @@ export async function POST(request) {
           callback_data: callbackData,
           last_status_check: new Date().toISOString(),
         }).or(filter);
-        break;
 
+        // Only send email if not already confirmed (avoid duplicates)
+        if (existingOrder && !existingOrder.payment_confirmed_at && existingOrder.customer_email) {
+          const orderForEmail = {
+            ...existingOrder,
+            financial_transaction_id: financialTransactionId,
+          };
+          sendOrderPlacedEmails(orderForEmail).catch((err) =>
+            console.error("Order placed email error:", err.message)
+          );
+        }
+        break;
+      }
+
+      // REJECTED and TIMEOUT are terminal failure states from MTN MoMo
       case "FAILED":
+      case "REJECTED":
+      case "TIMEOUT":
         await db.from("orders").update({
           payment_status: "FAILED",
-          failure_reason: reason || "Unknown",
+          failure_reason: reason || status || "Unknown",
           callback_received: true,
           callback_data: callbackData,
           last_status_check: new Date().toISOString(),
@@ -104,7 +127,7 @@ export async function POST(request) {
         break;
 
       default:
-        console.warn("Unknown callback status:", status);
+        console.warn("Unhandled MoMo callback status:", status);
     }
 
     return NextResponse.json({

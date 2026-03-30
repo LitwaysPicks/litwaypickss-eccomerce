@@ -82,7 +82,7 @@ export function useDashboardStats() {
     recentOrders.forEach((o) => {
       counts[o.payment_status] = (counts[o.payment_status] || 0) + 1;
     });
-    const COLORS = { COMPLETED: "#22c55e", PENDING: "#f97316", FAILED: "#ef4444", REFUNDED: "#8b5cf6" };
+    const COLORS = { SUCCESSFUL: "#3b82f6", COMPLETED: "#22c55e", PENDING: "#f97316", FAILED: "#ef4444", REFUNDED: "#8b5cf6" };
     return Object.entries(counts).map(([status, count]) => ({
       name: status.charAt(0) + status.slice(1).toLowerCase(),
       value: count,

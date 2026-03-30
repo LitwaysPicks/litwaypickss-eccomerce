@@ -2,8 +2,11 @@
 import { X, Package, User, MapPin, CreditCard } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 
-const STATUS_OPTIONS = ["PENDING", "COMPLETED", "FAILED", "REFUNDED"];
+// SUCCESSFUL = payment confirmed by MoMo (awaiting fulfilment)
+// COMPLETED  = admin has fulfilled/delivered the order
+const STATUS_OPTIONS = ["PENDING", "SUCCESSFUL", "COMPLETED", "FAILED", "REFUNDED"];
 const STATUS_STYLES = {
+  SUCCESSFUL: "bg-blue-100 text-blue-700 border-blue-200",
   COMPLETED: "bg-green-100 text-green-700 border-green-200",
   PENDING: "bg-orange-100 text-orange-700 border-orange-200",
   FAILED: "bg-red-100 text-red-700 border-red-200",
