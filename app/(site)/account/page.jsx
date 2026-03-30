@@ -13,6 +13,8 @@ import {
   EyeOff,
   ShieldCheck,
   Trash2,
+  Star,
+  MessageSquare,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -27,19 +29,21 @@ import {
 } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/client";
 import { fetchMyOrdersAction, retryOrderItemsAction } from "@/app/actions/orders";
+import { fetchReviewableItemsAction, submitReviewAction } from "@/app/actions/reviews";
 import { RefreshCw } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useWishlist } from "@/lib/wishlist-context";
 import { useCart } from "@/lib/cart-context";
 import Link from "next/link";
+import Image from "next/image";
 
 function AccountContent() {
   const { user } = useAuth();
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const VALID_TABS = ["profile", "orders", "wishlist", "settings"];
+  const VALID_TABS = ["profile", "orders", "wishlist", "reviews", "settings"];
   const activeTab = VALID_TABS.includes(searchParams.get("tab"))
     ? searchParams.get("tab")
     : "profile";
@@ -65,6 +69,46 @@ function AccountContent() {
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
+  // ── Reviews ────────────────────────────────────────────────────────────────
+  const {
+    data: reviewableItems = [],
+    isLoading: reviewableLoading,
+    refetch: refetchReviewable,
+  } = useQuery({
+    queryKey: ["reviewable-items", user?.email],
+    queryFn: fetchReviewableItemsAction,
+    enabled: !!user?.email,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const [reviewModal, setReviewModal] = useState(null); // { productId, productName, productImage, orderId, orderRef }
+  const [reviewForm, setReviewForm] = useState({ rating: 0, comment: "" });
+  const [hoverRating, setHoverRating] = useState(0);
+
+  const submitReviewMutation = useMutation({
+    mutationFn: () =>
+      submitReviewAction({
+        productId: reviewModal.productId,
+        orderId: reviewModal.orderId,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment,
+      }),
+    onSuccess: () => {
+      toast.success("Review submitted! Thank you.");
+      setReviewModal(null);
+      setReviewForm({ rating: 0, comment: "" });
+      refetchReviewable();
+    },
+    onError: (err) => toast.error(err.message || "Failed to submit review"),
+  });
+
+  const openReviewModal = (item) => {
+    setReviewForm({ rating: 0, comment: "" });
+    setHoverRating(0);
+    setReviewModal(item);
+  };
+
   const [isEditing, setIsEditing] = useState(false);
 
   // Security modals
@@ -104,6 +148,7 @@ function AccountContent() {
     { id: "profile", label: "Profile", icon: User },
     { id: "orders", label: "Orders", icon: Package },
     { id: "wishlist", label: "Wishlist", icon: Heart },
+    { id: "reviews", label: "Reviews", icon: Star },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -542,9 +587,11 @@ function AccountContent() {
                         className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                       >
                         <div className="flex space-x-4">
-                          <img
-                            src={item.images?.[0] || item.image_urls?.[0] || ""}
+                          <Image
+                            src={item.images?.[0] || item.image_urls?.[0] || "https://images.pexels.com/photos/5632396/pexels-photo-5632396.jpeg?auto=compress&cs=tinysrgb&w=64"}
                             alt={item.name}
+                            width={64}
+                            height={64}
                             className="w-16 h-16 object-cover rounded-lg"
                           />
                           <div className="flex-1">
@@ -585,6 +632,69 @@ function AccountContent() {
                     <Link href="/shop" className="btn btn-primary">
                       Browse Products
                     </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "reviews" && (
+              <div className="card p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">My Reviews</h2>
+                <p className="text-sm text-gray-500 mb-6">
+                  You can review products from completed orders.
+                </p>
+
+                {reviewableLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((n) => (
+                      <div key={n} className="border rounded-lg p-4 animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-2" />
+                        <div className="h-3 bg-gray-100 rounded w-1/3" />
+                      </div>
+                    ))}
+                  </div>
+                ) : reviewableItems.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
+                    <p className="text-gray-600">Complete an order to review the products.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {reviewableItems.map((item) => (
+                      <div
+                        key={`${item.orderId}-${item.productId}`}
+                        className="flex items-center gap-4 border rounded-lg p-4"
+                      >
+                        {item.productImage && (
+                          <Image
+                            src={item.productImage}
+                            alt={item.productName}
+                            width={56}
+                            height={56}
+                            className="w-14 h-14 object-cover rounded-lg shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{item.productName}</p>
+                          <p className="text-xs text-gray-500">Order {item.orderRef}</p>
+                          {item.alreadyReviewed && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                              <span className="text-xs text-gray-500">Reviewed</span>
+                            </div>
+                          )}
+                        </div>
+                        {!item.alreadyReviewed && (
+                          <button
+                            onClick={() => openReviewModal(item)}
+                            className="btn btn-outline btn-sm shrink-0"
+                          >
+                            Write Review
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -682,6 +792,88 @@ function AccountContent() {
           </div>
         </div>
       </div>
+
+      {/* ── Write Review Modal ───────────────────────────────────────────── */}
+      {reviewModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Write a Review</h3>
+              <button
+                onClick={() => setReviewModal(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-1 font-medium">{reviewModal.productName}</p>
+            <p className="text-xs text-gray-400 mb-5">Order {reviewModal.orderRef}</p>
+
+            {/* Star picker */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rating <span className="text-red-500">*</span>
+              </label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => setReviewForm((f) => ({ ...f, rating: star }))}
+                    className="focus:outline-none"
+                  >
+                    <Star
+                      className={`h-8 w-8 transition-colors ${
+                        star <= (hoverRating || reviewForm.rating)
+                          ? "text-yellow-400 fill-current"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              {reviewForm.rating > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {["", "Poor", "Fair", "Good", "Very Good", "Excellent"][reviewForm.rating]}
+                </p>
+              )}
+            </div>
+
+            {/* Comment */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Comment <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <textarea
+                rows={3}
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
+                placeholder="Share your experience with this product…"
+                className="input resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => submitReviewMutation.mutate()}
+                disabled={reviewForm.rating === 0 || submitReviewMutation.isPending}
+                className="btn btn-primary flex-1 disabled:opacity-50"
+              >
+                {submitReviewMutation.isPending ? "Submitting…" : "Submit Review"}
+              </button>
+              <button
+                onClick={() => setReviewModal(null)}
+                className="btn btn-outline px-5"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Change Password Modal ─────────────────────────────────────────── */}
       {showChangePassword && (

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAccessToken, fetchTransactionDetails } from "@/lib/momo/service";
-import { sendOrderPlacedEmails } from "@/lib/email";
+import { sendOrderPlacedEmails, sendOrderFailedEmails } from "@/lib/email";
+import { notifyOrderPlaced, notifyOrderFailed } from "@/lib/notifications";
 
 export async function GET(request, { params }) {
   const { referenceId } = await params;
@@ -79,15 +80,25 @@ export async function GET(request, { params }) {
       .update(updateData)
       .eq("reference_id", referenceId);
 
-    // Send order placed email on first SUCCESSFUL confirmation
-    if (status === "SUCCESSFUL" && order && !order.payment_confirmed_at && order.customer_email) {
+    // Send email notifications on terminal payment statuses
+    if (order?.customer_email) {
       const orderForEmail = {
         ...order,
         financial_transaction_id: transaction.financialTransactionId || order.financial_transaction_id,
+        failure_reason: rawStatus !== status ? rawStatus : undefined,
       };
-      sendOrderPlacedEmails(orderForEmail).catch((err) =>
-        console.error("Order placed email error:", err.message)
-      );
+
+      if (status === "SUCCESSFUL" && !order.payment_confirmed_at) {
+        sendOrderPlacedEmails(orderForEmail).catch((err) =>
+          console.error("Order placed email error:", err.message)
+        );
+        notifyOrderPlaced(orderForEmail);
+      } else if (status === "FAILED" && order.payment_status !== "FAILED") {
+        sendOrderFailedEmails(orderForEmail).catch((err) =>
+          console.error("Order failed email error:", err.message)
+        );
+        notifyOrderFailed(orderForEmail);
+      }
     }
 
     return NextResponse.json({

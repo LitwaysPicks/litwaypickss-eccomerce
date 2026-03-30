@@ -76,9 +76,13 @@ export function CartProvider({ children }) {
     if (userId) scheduleSave(userId, items)
   }, [items, userId])
 
-  const addItem = (product, qty = 1) => {
+  // Variants (size, color) create distinct cart entries via a composite cartKey.
+  const addItem = (product, qty = 1, variant = {}) => {
+    const { size = null, color = null } = variant
+    const cartKey = [product.id, size, color].filter(Boolean).join('::') || product.id
+
     setItems(current => {
-      const existing = current.find(item => item.id === product.id)
+      const existing = current.find(item => item.cartKey === cartKey)
 
       if (existing) {
         if (existing.quantity >= product.stock) {
@@ -88,26 +92,27 @@ export function CartProvider({ children }) {
         const newQty = Math.min(existing.quantity + qty, product.stock)
         toast.success('Item quantity updated')
         return current.map(item =>
-          item.id === product.id ? { ...item, quantity: newQty } : item
+          item.cartKey === cartKey ? { ...item, quantity: newQty } : item
         )
       }
 
       const actualQty = Math.min(qty, product.stock)
       toast.success('Item added to cart')
-      return [...current, { ...product, quantity: actualQty }]
+      return [...current, { ...product, cartKey, selectedSize: size, selectedColor: color, quantity: actualQty }]
     })
   }
 
-  const removeItem = (id) => {
-    setItems(current => current.filter(item => item.id !== id))
+  // cartKey is the composite key; falls back to id for legacy items without a key.
+  const removeItem = (cartKey) => {
+    setItems(current => current.filter(item => (item.cartKey ?? item.id) !== cartKey))
     toast.success('Item removed from cart')
   }
 
-  const updateQuantity = (id, quantity) => {
-    if (quantity <= 0) { removeItem(id); return }
+  const updateQuantity = (cartKey, quantity) => {
+    if (quantity <= 0) { removeItem(cartKey); return }
     setItems(current =>
       current.map(item => {
-        if (item.id !== id) return item
+        if ((item.cartKey ?? item.id) !== cartKey) return item
         const newQuantity = Math.min(quantity, item.stock)
         if (newQuantity !== quantity) toast.error('Quantity limited by available stock')
         return { ...item, quantity: newQuantity }
@@ -153,6 +158,6 @@ export function useCart() {
 }
 
 function mergeCartItems(remote, local) {
-  const remoteIds = new Set(remote.map(r => r.id))
-  return [...remote, ...local.filter(l => !remoteIds.has(l.id))]
+  const remoteKeys = new Set(remote.map(r => r.cartKey ?? r.id))
+  return [...remote, ...local.filter(l => !remoteKeys.has(l.cartKey ?? l.id))]
 }
