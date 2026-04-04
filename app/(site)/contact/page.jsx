@@ -82,7 +82,7 @@ export default function ContactPage() {
     {
       question: "Can I return or exchange items?",
       answer:
-        "Yes, we have a 30-day return policy. Items must be in original condition with packaging.",
+        "Yes, we have a 7-day return policy. Items must be in original condition with packaging.",
     },
   ];
 

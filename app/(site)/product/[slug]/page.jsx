@@ -238,7 +238,7 @@ export default async function ProductPage({ params }) {
             </div>
             <div className="flex items-center space-x-3 text-sm text-gray-600">
               <RotateCcw className="h-5 w-5 text-primary-600" />
-              <span>30-day return policy</span>
+              <span>7-day return policy</span>
             </div>
           </div>
         </div>
