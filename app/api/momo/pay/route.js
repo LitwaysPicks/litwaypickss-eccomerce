@@ -75,6 +75,7 @@ export async function POST(request) {
     }
 
     const accessToken = await getAccessToken();
+    console.log("[MoMo Pay] phone:", formattedPhone, "amount:", amount, "currency:", currency, "env:", process.env.MOMO_ENVIRONMENT);
     const result = await requestToPay(
       {
         amount,
