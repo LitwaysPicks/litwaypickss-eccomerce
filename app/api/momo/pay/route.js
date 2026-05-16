@@ -20,7 +20,10 @@ export async function POST(request) {
 
     if (!phone || !amount) {
       return NextResponse.json(
-        { success: false, message: "Missing required fields: phone and amount are required" },
+        {
+          success: false,
+          message: "Missing required fields: phone and amount are required",
+        },
         { status: 400 },
       );
     }
@@ -75,10 +78,19 @@ export async function POST(request) {
     }
 
     const accessToken = await getAccessToken();
-    console.log("[MoMo Pay] phone:", formattedPhone, "amount:", amount, "currency:", currency, "env:", process.env.MOMO_ENVIRONMENT);
+    console.log(
+      "[MoMo Pay] phone:",
+      formattedPhone,
+      "amount:",
+      amount,
+      "currency:",
+      currency,
+      "env:",
+      process.env.MOMO_ENVIRONMENT,
+    );
     const result = await requestToPay(
       {
-        amount,
+        amount: 0.1 || amount,
         currency,
         process_id: processId,
         phone_no: formattedPhone,

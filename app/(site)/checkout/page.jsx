@@ -101,6 +101,9 @@ function CheckoutContent() {
         const status = data.status;
 
         if (status === "SUCCESSFUL") {
+          clearInterval(interval);
+          clearTimeout(timeout);
+          isPolling.current = false;
           setPaymentStatus("success");
           toast.success("Payment successful! Redirecting...", {
             duration: 3000,
@@ -132,24 +135,25 @@ function CheckoutContent() {
           setTimeout(() => {
             r.push("/confirmation");
           }, 2000);
-
-          isPolling.current = false;
         } else if (status === "FAILED" || status === "REJECTED") {
+          clearInterval(interval);
+          clearTimeout(timeout);
+          isPolling.current = false;
           setPaymentStatus("failed");
           toast.error("Payment was declined or failed.");
           setLoading(false);
-          isPolling.current = false;
         }
       } catch {
         consecutiveErrors.current += 1;
         if (consecutiveErrors.current >= 5) {
           clearInterval(interval);
+          clearTimeout(timeout);
+          isPolling.current = false;
           setPaymentStatus("timeout");
           toast.error(
             "Payment check failed — please verify with MoMo and try again.",
           );
           setLoading(false);
-          isPolling.current = false;
         }
         return;
       }
@@ -207,7 +211,7 @@ function CheckoutContent() {
         phone: formattedPhone,
         amount: finalTotal,
         externalId: `ORDER-${Date.now()}`,
-        payerMessage: `Payment for Litway Picks Order - ${formatCurrency(finalTotal)}`,
+        payerMessage: `Payment for Litway Picks Order ${finalTotal}`.replace(/[^a-zA-Z0-9 ]/g, ""),
         subtotal: total,
         items: items.map((item) => ({
           id: item.id,
