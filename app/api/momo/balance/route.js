@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { getAccessToken, getAccountBalance } from "@/lib/momo/service";
+import { requireAdminApi } from "@/lib/api-auth";
 
 /**
  * GET /api/momo/balance
- * Returns the MoMo collection account balance (admin use).
+ * Returns the MoMo collection account balance (admin only).
  */
 export async function GET() {
+  const { response: authResponse } = await requireAdminApi();
+  if (authResponse) return authResponse;
+
   try {
     const accessToken = await getAccessToken();
     const balance = await getAccountBalance("USD", accessToken);

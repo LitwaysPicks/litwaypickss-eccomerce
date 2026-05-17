@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdminApi } from "@/lib/api-auth";
 
 /**
  * GET /api/momo/transactions
- * Returns orders list (admin use). Supports ?limit and ?status query params.
+ * Returns orders list (admin only). Supports ?limit and ?status query params.
  */
 export async function GET(request) {
+  const { response: authResponse } = await requireAdminApi();
+  if (authResponse) return authResponse;
+
   try {
     const { searchParams } = new URL(request.url);
     const limit = Math.min(parseInt(searchParams.get("limit") || "100", 10), 100);

@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Fetch all orders for the currently authenticated user, matched by email.
- * The orders table has no user_id FK, so we match on customer_email.
+ * Fetch all orders for the currently authenticated user.
+ * Matches by user_id (new orders) OR customer_email when user_id is null
+ * (legacy rows from before the user_id column existed).
  * Re-validates the session on every call — never trusts client-supplied email.
  * Uses the service-role client to bypass RLS (safe: auth is validated first).
  */
@@ -19,8 +20,6 @@ export async function fetchMyOrdersAction() {
 
   if (authError || !user) throw new Error("Not authenticated.");
 
-  // Use the admin client so RLS doesn't silently block the query.
-  // Auth is already validated above — we only return this user's orders.
   const admin = createAdminClient();
 
   const { data, error } = await admin
@@ -28,11 +27,12 @@ export async function fetchMyOrdersAction() {
     .select(
       "id, external_id, created_at, final_total, payment_status, items, delivery_city, delivery_state, customer_first_name, customer_last_name",
     )
-    .ilike("customer_email", user.email)
+    .or(
+      `user_id.eq.${user.id},and(user_id.is.null,customer_email.ilike.${user.email})`,
+    )
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
-  console.log("Fetched orders for", user.email, data);
   return data ?? [];
 }
 

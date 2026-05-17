@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
       .single();
 
     // Terminal statuses already in DB — no need to re-query MoMo
-    const TERMINAL_DB_STATUSES = ["SUCCESSFUL", "FAILED", "COMPLETED", "REFUNDED"];
+    const TERMINAL_DB_STATUSES = ["SUCCESSFUL", "FAILED", "COMPLETED", "REFUNDED", "DISPUTED"];
     if (!dbError && order && TERMINAL_DB_STATUSES.includes(order.payment_status)) {
       return NextResponse.json({
         success: true,
@@ -57,7 +57,26 @@ export async function GET(request, { params }) {
       CREATED: "PENDING",
     };
     const rawStatus = transaction.status;
-    const status = MOMO_STATUS_MAP[rawStatus] ?? rawStatus;
+    let status = MOMO_STATUS_MAP[rawStatus] ?? rawStatus;
+
+    // Verify the paid amount/currency match the order before marking SUCCESSFUL.
+    // Without this check, MoMo returning SUCCESSFUL for any amount would
+    // mark the full DB-recorded total as paid.
+    let amountMismatchReason = null;
+    if (status === "SUCCESSFUL" && order) {
+      const paidAmount = Number(transaction.amount);
+      const expectedAmount = Number(order.amount);
+      const amountOk =
+        Number.isFinite(paidAmount) &&
+        Number.isFinite(expectedAmount) &&
+        Math.abs(paidAmount - expectedAmount) < 0.01;
+      const currencyOk = !transaction.currency || transaction.currency === order.currency;
+      if (!amountOk || !currencyOk) {
+        amountMismatchReason = `Amount mismatch: paid ${paidAmount} ${transaction.currency || "?"}, expected ${expectedAmount} ${order.currency}`;
+        console.error("MoMo status amount/currency mismatch:", { orderId: order.id, paidAmount, expectedAmount });
+        status = "DISPUTED";
+      }
+    }
 
     // 3. Update database with normalised status
     const updateData = {
@@ -69,6 +88,9 @@ export async function GET(request, { params }) {
     }
     if (status === "SUCCESSFUL") {
       updateData.payment_confirmed_at = new Date().toISOString();
+    }
+    if (status === "DISPUTED") {
+      updateData.failure_reason = amountMismatchReason;
     }
     if (status === "FAILED" && rawStatus !== status) {
       // Store the original MoMo status as the failure reason

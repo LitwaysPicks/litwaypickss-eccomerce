@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderCompletedEmails, sendOrderFailedEmails, sendOrderRefundedEmails } from "@/lib/email";
 import { createAdminNotification } from "@/lib/notifications";
+import { requireAdminApi } from "@/lib/api-auth";
 
 /**
  * PATCH /api/orders/[id]/status
@@ -9,6 +10,9 @@ import { createAdminNotification } from "@/lib/notifications";
  * when status changes to COMPLETED or REFUNDED.
  */
 export async function PATCH(request, { params }) {
+  const { response: authResponse } = await requireAdminApi();
+  if (authResponse) return authResponse;
+
   const { id } = await params;
 
   try {

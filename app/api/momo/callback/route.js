@@ -12,7 +12,48 @@ export async function POST(request) {
   const startTime = Date.now();
 
   try {
-    const payload = await request.json();
+    // HMAC must be verified against the RAW body (not re-serialized JSON),
+    // otherwise key-order differences between sender and receiver break
+    // signature equality. Read text first, then JSON.parse.
+    const rawBody = await request.text();
+
+    const secret = process.env.MOMO_CALLBACK_SECRET;
+    if (!secret) {
+      console.error("MOMO_CALLBACK_SECRET not configured — rejecting all callbacks");
+      return NextResponse.json(
+        { success: false, message: "Server misconfigured" },
+        { status: 500 },
+      );
+    }
+    const signature = request.headers.get("x-momo-signature");
+    if (!signature) {
+      return NextResponse.json(
+        { success: false, message: "Missing signature" },
+        { status: 401 },
+      );
+    }
+    const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expected);
+    if (
+      sigBuf.length !== expBuf.length ||
+      !crypto.timingSafeEqual(sigBuf, expBuf)
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Invalid signature" },
+        { status: 401 },
+      );
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Invalid JSON" },
+        { status: 400 },
+      );
+    }
 
     const {
       financialTransactionId = null,
@@ -34,21 +75,6 @@ export async function POST(request) {
         { success: false, message: "No transaction identifier in callback" },
         { status: 400 },
       );
-    }
-
-    // Verify HMAC signature if secret is configured
-    const signature = request.headers.get("x-momo-signature");
-    const secret = process.env.MOMO_CALLBACK_SECRET;
-    if (secret && signature) {
-      const expected = crypto
-        .createHmac("sha256", secret)
-        .update(JSON.stringify(payload))
-        .digest("hex");
-      const sigBuf = Buffer.from(signature);
-      const expBuf = Buffer.from(expected);
-      if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
-        return NextResponse.json({ success: false, message: "Invalid signature" }, { status: 401 });
-      }
     }
 
     const transactionId = referenceId || financialTransactionId;
@@ -80,6 +106,34 @@ export async function POST(request) {
           .select("*")
           .or(filter)
           .maybeSingle();
+
+        // Verify the paid amount and currency match the order. A mismatch
+        // means the customer paid less (or in a different currency) than
+        // the order records — never mark it SUCCESSFUL.
+        if (existingOrder) {
+          const paidAmount = Number(amount);
+          const expectedAmount = Number(existingOrder.amount);
+          const amountOk =
+            Number.isFinite(paidAmount) &&
+            Number.isFinite(expectedAmount) &&
+            Math.abs(paidAmount - expectedAmount) < 0.01;
+          const currencyOk = !currency || currency === existingOrder.currency;
+
+          if (!amountOk || !currencyOk) {
+            console.error(
+              "MoMo callback amount/currency mismatch:",
+              { orderId: existingOrder.id, paidAmount, expectedAmount, paidCurrency: currency, expectedCurrency: existingOrder.currency },
+            );
+            await db.from("orders").update({
+              payment_status: "DISPUTED",
+              failure_reason: `Amount mismatch: paid ${paidAmount} ${currency || "?"}, expected ${expectedAmount} ${existingOrder.currency}`,
+              callback_received: true,
+              callback_data: callbackData,
+              last_status_check: new Date().toISOString(),
+            }).or(filter);
+            break;
+          }
+        }
 
         await db.from("orders").update({
           payment_status: "SUCCESSFUL",
