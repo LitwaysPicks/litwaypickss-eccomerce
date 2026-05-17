@@ -90,7 +90,7 @@ export async function POST(request) {
     );
     const result = await requestToPay(
       {
-        amount: 0.1 || amount,
+        amount: amount,
         currency,
         process_id: processId,
         phone_no: formattedPhone,
