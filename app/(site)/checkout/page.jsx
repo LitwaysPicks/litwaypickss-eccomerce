@@ -239,6 +239,11 @@ function CheckoutContent() {
       const data = await momoAPI.initiatePayment(payload);
 
       if (!data.success) {
+        if (data.message === "Authentication required") {
+          toast.error("Please sign in to complete your payment.");
+          router.push("/login?from=/checkout");
+          return;
+        }
         throw new Error(data.message || "Payment failed to start.");
       }
 

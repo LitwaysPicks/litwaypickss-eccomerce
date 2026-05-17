@@ -31,7 +31,7 @@ import { NextResponse } from "next/server";
  */
 
 // Protected paths that require authentication
-const AUTH_REQUIRED = ["/account"];
+const AUTH_REQUIRED = ["/account", "/checkout"];
 // Paths that require authentication AND admin role (coarse check)
 const ADMIN_PATHS = ["/admin"];
 
