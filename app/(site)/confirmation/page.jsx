@@ -12,19 +12,58 @@ function ConfirmationContent() {
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
-    // Read from sessionStorage (set by CheckoutPage on successful payment)
+    let referenceId = null;
     try {
       const stored = sessionStorage.getItem("lastOrder");
       if (stored) {
-        setOrder(JSON.parse(stored));
-      } else {
-        setPaymentStatus("error");
-        toast.error("No payment information available.");
+        const parsed = JSON.parse(stored);
+        referenceId = parsed?.referenceId || null;
       }
     } catch {
+      // ignore parse errors
+    }
+
+    if (!referenceId) {
       setPaymentStatus("error");
       toast.error("No payment information available.");
+      return;
     }
+
+    // Always fetch authoritative order data from the server — the
+    // sessionStorage copy is just a transport for the referenceId.
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/momo/order/${encodeURIComponent(referenceId)}`);
+        if (!res.ok) {
+          if (!cancelled) {
+            setPaymentStatus("error");
+            toast.error("Could not load order details.");
+          }
+          return;
+        }
+        const data = await res.json();
+        if (cancelled) return;
+        if (!data?.success || !data.order) {
+          setPaymentStatus("error");
+          toast.error("Could not load order details.");
+          return;
+        }
+        setOrder(data.order);
+      } catch {
+        if (!cancelled) {
+          setPaymentStatus("error");
+          toast.error("Could not load order details.");
+        }
+      } finally {
+        // Clear the transport copy; server is now the source of truth
+        sessionStorage.removeItem("lastOrder");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -32,11 +71,14 @@ function ConfirmationContent() {
 
     setPaymentStatus("success");
     toast.success("Payment successful! Thank you for your purchase.");
-    sessionStorage.removeItem("lastOrder");
 
     const timer = setTimeout(() => router.push("/shop"), 8000);
     return () => clearTimeout(timer);
   }, [order, router]);
+
+  const customerName = order
+    ? `${order.customer_first_name || ""} ${order.customer_last_name || ""}`.trim()
+    : "";
 
   return (
     <div className="container mx-auto px-4 py-16 text-center">
@@ -73,35 +115,35 @@ function ConfirmationContent() {
                   Order Confirmation
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  A confirmation email has been sent to {order.email}
+                  A confirmation email has been sent to {order.customer_email}
                 </p>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Customer Name:</span>
-                  <span className="font-medium">{order.name}</span>
+                  <span className="font-medium">{customerName}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Email:</span>
-                  <span className="font-medium">{order.email}</span>
+                  <span className="font-medium">{order.customer_email}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Phone:</span>
-                  <span className="font-medium">{order.phone}</span>
+                  <span className="font-medium">{order.customer_phone}</span>
                 </div>
                 <div className="border-t pt-3 mt-3">
                   <div className="flex justify-between text-lg">
                     <span className="text-gray-600">Total Paid:</span>
                     <span className="font-bold text-green-600">
-                      {formatCurrency(order.amount)}
+                      {formatCurrency(order.final_total ?? order.amount)}
                     </span>
                   </div>
                 </div>
-                {order.referenceId && (
+                {order.reference_id && (
                   <div className="bg-gray-50 rounded-lg p-3 mt-4">
                     <p className="text-xs text-gray-500">Reference ID:</p>
                     <p className="font-mono text-sm text-gray-700">
-                      {order.referenceId}
+                      {order.reference_id}
                     </p>
                   </div>
                 )}

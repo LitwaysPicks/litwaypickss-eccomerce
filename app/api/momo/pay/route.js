@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAccessToken, requestToPay } from "@/lib/momo/service";
 import { formatLiberianPhone } from "@/lib/momo/phoneFormatter";
@@ -12,7 +13,6 @@ export async function POST(request) {
     const body = await request.json();
     const {
       phone,
-      externalId,
       payerMessage,
       items,
       deliveryInfo,
@@ -119,7 +119,9 @@ export async function POST(request) {
     // server-side discount engine, any client-supplied discount is forgeable.
     const computedTotal = Number(computedSubtotal.toFixed(2));
     const currency = "USD";
-    const processId = externalId || `ORDER-${Date.now()}`;
+    // Server-generated to guarantee uniqueness — client values are ignored
+    // so two checkouts can't collide on `ORDER-<same timestamp>`.
+    const processId = `ORDER-${crypto.randomUUID()}`;
 
     // Create order in database — customer identity comes from the session,
     // not the request body, so it can't be spoofed.

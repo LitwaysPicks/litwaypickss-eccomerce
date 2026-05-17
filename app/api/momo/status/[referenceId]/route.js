@@ -97,25 +97,29 @@ export async function GET(request, { params }) {
       updateData.failure_reason = rawStatus;
     }
 
-    await db
-      .from("orders")
-      .update(updateData)
-      .eq("reference_id", referenceId);
+    // Gate the transition on prior PENDING so concurrent pollers / the
+    // callback can race here without both crossing the side-effect line.
+    // The row updates iff payment_status is still PENDING; otherwise no row
+    // is returned and we skip emails/notifications.
+    const isTerminal = ["SUCCESSFUL", "FAILED", "DISPUTED"].includes(status);
+    const updateQuery = db.from("orders").update(updateData).eq("reference_id", referenceId);
+    if (isTerminal) updateQuery.eq("payment_status", "PENDING");
+    const { data: updated } = await updateQuery.select();
+    const transitionedRow = isTerminal && updated && updated.length === 1 ? updated[0] : null;
 
-    // Send email notifications on terminal payment statuses
-    if (order?.customer_email) {
+    if (transitionedRow && transitionedRow.customer_email) {
       const orderForEmail = {
-        ...order,
-        financial_transaction_id: transaction.financialTransactionId || order.financial_transaction_id,
-        failure_reason: rawStatus !== status ? rawStatus : undefined,
+        ...transitionedRow,
+        financial_transaction_id: transaction.financialTransactionId || transitionedRow.financial_transaction_id,
+        failure_reason: rawStatus !== status ? rawStatus : transitionedRow.failure_reason,
       };
 
-      if (status === "SUCCESSFUL" && !order.payment_confirmed_at) {
+      if (status === "SUCCESSFUL") {
         sendOrderPlacedEmails(orderForEmail).catch((err) =>
           console.error("Order placed email error:", err.message)
         );
         notifyOrderPlaced(orderForEmail);
-      } else if (status === "FAILED" && order.payment_status !== "FAILED") {
+      } else if (status === "FAILED") {
         sendOrderFailedEmails(orderForEmail).catch((err) =>
           console.error("Order failed email error:", err.message)
         );

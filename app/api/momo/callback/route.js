@@ -94,13 +94,13 @@ export async function POST(request) {
       callbackReceivedAt: new Date().toISOString(),
     };
 
-    const filter = externalId
-      ? `reference_id.eq.${transactionId},external_id.eq.${externalId}`
-      : `reference_id.eq.${transactionId}`;
+    // Match by reference_id only — external_id is server-generated and unique,
+    // but mixing it into the OR filter would let a single callback co-update
+    // multiple historical rows in the (now-prevented) collision case.
+    const filter = `reference_id.eq.${transactionId}`;
 
     switch (status) {
       case "SUCCESSFUL": {
-        // Fetch current order to check if email already sent (dedup with status polling)
         const { data: existingOrder } = await db
           .from("orders")
           .select("*")
@@ -130,24 +130,27 @@ export async function POST(request) {
               callback_received: true,
               callback_data: callbackData,
               last_status_check: new Date().toISOString(),
-            }).or(filter);
+            }).or(filter).eq("payment_status", "PENDING");
             break;
           }
         }
 
-        await db.from("orders").update({
+        // Conditional update — only PENDING rows transition to SUCCESSFUL.
+        // If the poller already won the race, this update affects zero
+        // rows and we don't re-fire the order-placed email.
+        const { data: updated } = await db.from("orders").update({
           payment_status: "SUCCESSFUL",
           payment_confirmed_at: new Date().toISOString(),
           financial_transaction_id: financialTransactionId,
           callback_received: true,
           callback_data: callbackData,
           last_status_check: new Date().toISOString(),
-        }).or(filter);
+        }).or(filter).eq("payment_status", "PENDING").select();
 
-        // Only send email if not already confirmed (avoid duplicates)
-        if (existingOrder && !existingOrder.payment_confirmed_at && existingOrder.customer_email) {
+        const transitionedRow = updated && updated.length === 1 ? updated[0] : null;
+        if (transitionedRow && transitionedRow.customer_email) {
           const orderForEmail = {
-            ...existingOrder,
+            ...transitionedRow,
             financial_transaction_id: financialTransactionId,
           };
           sendOrderPlacedEmails(orderForEmail).catch((err) =>
@@ -167,7 +170,7 @@ export async function POST(request) {
           callback_received: true,
           callback_data: callbackData,
           last_status_check: new Date().toISOString(),
-        }).or(filter);
+        }).or(filter).eq("payment_status", "PENDING");
         break;
 
       case "PENDING":
