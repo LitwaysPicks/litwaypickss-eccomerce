@@ -61,7 +61,6 @@ export async function POST(request) {
           subtotal: parseFloat(subtotal || amount),
           discount: appliedDiscount ? parseFloat(appliedDiscount.discount) : 0,
           final_total: parseFloat(amount),
-          points_earned: Math.floor(amount * 1),
           loyalty_discount_applied: appliedDiscount || null,
         })
         .select()

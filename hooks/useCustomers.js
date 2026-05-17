@@ -44,7 +44,10 @@ export function useCustomers({ search = "", page = 0 } = {}) {
   });
 
   const deleteUser = useMutation({
-    mutationFn: deleteUserAction,
+    mutationFn: async (userId) => {
+      const result = await deleteUserAction(userId);
+      if (result?.error) throw new Error(result.error);
+    },
     onMutate: async (userId) => {
       await queryClient.cancelQueries({ queryKey: ["admin-customers"] });
       const previous = queryClient.getQueriesData({ queryKey: ["admin-customers"] });
@@ -66,7 +69,10 @@ export function useCustomers({ search = "", page = 0 } = {}) {
   });
 
   const createAdmin = useMutation({
-    mutationFn: createAdminUserAction,
+    mutationFn: async (data) => {
+      const result = await createAdminUserAction(data);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       toast.success("Admin account created");
       queryClient.invalidateQueries({ queryKey: ["admin-admins"] });
@@ -75,7 +81,10 @@ export function useCustomers({ search = "", page = 0 } = {}) {
   });
 
   const deleteAdmin = useMutation({
-    mutationFn: deleteUserAction,
+    mutationFn: async (userId) => {
+      const result = await deleteUserAction(userId);
+      if (result?.error) throw new Error(result.error);
+    },
     onMutate: async (userId) => {
       await queryClient.cancelQueries({ queryKey: ["admin-admins"] });
       const previous = queryClient.getQueryData(["admin-admins"]);

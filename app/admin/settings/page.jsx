@@ -49,7 +49,8 @@ export default function SettingsPage() {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      await updateProfileAction(user.id, profile);
+      const result = await updateProfileAction(user.id, profile);
+      if (result?.error) throw new Error(result.error);
       queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       toast.success("Profile updated");
     } catch (err) {

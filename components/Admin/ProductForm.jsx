@@ -223,8 +223,6 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
     ...tempImages,
   ];
 
-  const isClothing = ["mens", "womens"].includes(formData.category);
-
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Glassy backdrop */}
@@ -370,37 +368,64 @@ export default function ProductForm({ product, categories = [], onSave, onCancel
             <section className="space-y-4 border-t border-gray-100 pt-6">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Variants</p>
 
-              {isClothing && (
-                <div>
-                  <label className="block mb-2 text-xs font-medium text-gray-600">Sizes</label>
-                  <div className="flex flex-wrap gap-2">
-                    {CLOTHING_SIZES.map((size) => {
-                      const checked = formData.sizes.includes(size);
-                      return (
-                        <button
-                          key={size}
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              sizes: checked
-                                ? prev.sizes.filter((s) => s !== size)
-                                : [...prev.sizes, size],
-                            }))
-                          }
-                          className={`h-8 min-w-[40px] rounded-lg border px-2.5 text-xs font-medium transition-colors ${
-                            checked
-                              ? "border-primary-500 bg-primary-50 text-primary-700"
-                              : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      );
-                    })}
-                  </div>
+              <div>
+                <label className="block mb-2 text-xs font-medium text-gray-600">Sizes</label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {CLOTHING_SIZES.map((size) => {
+                    const checked = formData.sizes.includes(size);
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            sizes: checked
+                              ? prev.sizes.filter((s) => s !== size)
+                              : [...prev.sizes, size],
+                          }))
+                        }
+                        className={`h-8 min-w-10 rounded-lg border px-2.5 text-xs font-medium transition-colors ${
+                          checked
+                            ? "border-primary-500 bg-primary-50 text-primary-700"
+                            : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
+                <ChipInput
+                  chips={formData.sizes.filter((s) => !CLOTHING_SIZES.includes(s))}
+                  onAdd={(s) => {
+                    if (!formData.sizes.includes(s))
+                      setFormData((prev) => ({ ...prev, sizes: [...prev.sizes, s] }));
+                  }}
+                  onRemove={(idx) => {
+                    const custom = formData.sizes.filter((s) => !CLOTHING_SIZES.includes(s));
+                    const toRemove = custom[idx];
+                    setFormData((prev) => ({ ...prev, sizes: prev.sizes.filter((s) => s !== toRemove) }));
+                  }}
+                  placeholder="e.g. 42, 10.5, OS, 32x30…"
+                  hint="For custom sizes (shoes, pants, one-size): type and press Enter, comma, or tap Add"
+                  renderChip={(size, idx, onRemove) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700"
+                    >
+                      {size}
+                      <button
+                        type="button"
+                        onClick={onRemove}
+                        className="text-gray-400 hover:text-gray-600 leading-none ml-0.5"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                />
+              </div>
 
               {/* Colors */}
               <div>

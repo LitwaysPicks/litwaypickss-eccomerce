@@ -64,7 +64,11 @@ function AccountContent() {
     isError: ordersError,
   } = useQuery({
     queryKey: ["my-orders", user?.email],
-    queryFn: fetchMyOrdersAction,
+    queryFn: async () => {
+      const result = await fetchMyOrdersAction();
+      if (result?.error) throw new Error(result.error);
+      return result.data;
+    },
     enabled: !!user?.email,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -76,7 +80,11 @@ function AccountContent() {
     refetch: refetchReviewable,
   } = useQuery({
     queryKey: ["reviewable-items", user?.email],
-    queryFn: fetchReviewableItemsAction,
+    queryFn: async () => {
+      const result = await fetchReviewableItemsAction();
+      if (result?.error) throw new Error(result.error);
+      return result.data;
+    },
     enabled: !!user?.email,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -87,13 +95,15 @@ function AccountContent() {
   const [hoverRating, setHoverRating] = useState(0);
 
   const submitReviewMutation = useMutation({
-    mutationFn: () =>
-      submitReviewAction({
+    mutationFn: async () => {
+      const result = await submitReviewAction({
         productId: reviewModal.productId,
         orderId: reviewModal.orderId,
         rating: reviewForm.rating,
         comment: reviewForm.comment,
-      }),
+      });
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       toast.success("Review submitted! Thank you.");
       setReviewModal(null);
@@ -157,7 +167,10 @@ function AccountContent() {
   };
 
   const updateProfileMutation = useMutation({
-    mutationFn: (data) => updateProfileAction(user?.id, data),
+    mutationFn: async (data) => {
+      const result = await updateProfileAction(user?.id, data);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       router.refresh();
@@ -168,7 +181,10 @@ function AccountContent() {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: logoutAction,
+    mutationFn: async () => {
+      const result = await logoutAction();
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       router.push("/");
@@ -177,7 +193,10 @@ function AccountContent() {
   });
 
   const changePasswordMutation = useMutation({
-    mutationFn: () => changePasswordInAppAction(pwForm.newPassword),
+    mutationFn: async () => {
+      const result = await changePasswordInAppAction(pwForm.newPassword);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       toast.success("Password updated successfully!");
       setShowChangePassword(false);
@@ -187,7 +206,10 @@ function AccountContent() {
   });
 
   const deleteAccountMutation = useMutation({
-    mutationFn: deleteAccountAction,
+    mutationFn: async () => {
+      const result = await deleteAccountAction();
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       queryClient.clear();
       router.push("/");
@@ -242,7 +264,9 @@ function AccountContent() {
     if (retryingOrderId) return;
     setRetryingOrderId(order.id);
     try {
-      const { available, unavailable } = await retryOrderItemsAction(order.items ?? []);
+      const _result = await retryOrderItemsAction(order.items ?? []);
+      if (_result?.error) throw new Error(_result.error);
+      const { available, unavailable } = _result.data;
 
       if (unavailable.length > 0) {
         toast.warning(
@@ -510,6 +534,7 @@ function AccountContent() {
                     {orders.map((order) => {
                       const statusStyles = {
                         COMPLETED: "text-green-600 bg-green-50",
+                        SUCCESSFUL: "text-blue-600 bg-blue-50",
                         PENDING: "text-orange-600 bg-orange-50",
                         FAILED: "text-red-600 bg-red-50",
                         REFUNDED: "text-purple-600 bg-purple-50",
