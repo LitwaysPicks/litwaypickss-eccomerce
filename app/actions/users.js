@@ -49,6 +49,8 @@ export async function createAdminUserAction({ email, password, firstName, lastNa
       last_name: lastName.trim(),
       email: email.trim().toLowerCase(),
       role: "admin",
+      city: "",
+      country: "",
     });
 
     if (profileError) {
