@@ -64,7 +64,11 @@ export default function AdminTopbar({ onMenuClick }) {
   // Poll every 30 seconds
   const { data: notifications = [] } = useQuery({
     queryKey: ["admin-notifications"],
-    queryFn: fetchAdminNotificationsAction,
+    queryFn: async () => {
+      const result = await fetchAdminNotificationsAction();
+      if (result?.error) throw new Error(result.error);
+      return result.data;
+    },
     refetchInterval: 30_000,
     staleTime: 15_000,
   });
@@ -72,12 +76,18 @@ export default function AdminTopbar({ onMenuClick }) {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markRead = useMutation({
-    mutationFn: markNotificationReadAction,
+    mutationFn: async (id) => {
+      const result = await markNotificationReadAction(id);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-notifications"] }),
   });
 
   const markAllRead = useMutation({
-    mutationFn: markAllNotificationsReadAction,
+    mutationFn: async () => {
+      const result = await markAllNotificationsReadAction();
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-notifications"] }),
   });
 

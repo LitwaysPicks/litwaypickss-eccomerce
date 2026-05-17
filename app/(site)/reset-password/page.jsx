@@ -44,7 +44,10 @@ function ResetPasswordContent() {
   }, [searchParams]);
 
   const resetMutation = useMutation({
-    mutationFn: updatePasswordAction,
+    mutationFn: async (password) => {
+      const result = await updatePasswordAction(password);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       toast.success("Password updated successfully! Please sign in again.");

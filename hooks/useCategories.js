@@ -26,7 +26,10 @@ export function useCategories() {
   };
 
   const addCategory = useMutation({
-    mutationFn: addCategoryAction,
+    mutationFn: async (data) => {
+      const result = await addCategoryAction(data);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       toast.success("Category added");
       invalidate();
@@ -35,7 +38,10 @@ export function useCategories() {
   });
 
   const deleteCategory = useMutation({
-    mutationFn: deleteCategoryAction,
+    mutationFn: async (id) => {
+      const result = await deleteCategoryAction(id);
+      if (result?.error) throw new Error(result.error);
+    },
     onMutate: async (categoryId) => {
       await queryClient.cancelQueries({ queryKey: ["admin-categories"] });
       const previous = queryClient.getQueryData(["admin-categories"]);

@@ -39,7 +39,10 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
   // components so the new session is immediately visible.
 
   const loginMutation = useMutation({
-    mutationFn: loginAction,
+    mutationFn: async (data) => {
+      const result = await loginAction(data);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       router.refresh();
@@ -51,7 +54,10 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
   });
 
   const registerMutation = useMutation({
-    mutationFn: signupAction,
+    mutationFn: async (data) => {
+      const result = await signupAction(data);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       router.refresh();
@@ -72,7 +78,10 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
   });
 
   const forgotPasswordMutation = useMutation({
-    mutationFn: sendPasswordResetAction,
+    mutationFn: async (email) => {
+      const result = await sendPasswordResetAction(email);
+      if (result?.error) throw new Error(result.error);
+    },
     onSuccess: () => {
       toast.success("Password reset link sent! Check your inbox.");
       setView("auth");
@@ -166,7 +175,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
           {view === "forgot" ? (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <p className="text-sm text-gray-600">
-                Enter your email and we'll send you a link to reset your password.
+                Enter your email and we&apos;ll send you a link to reset your password.
               </p>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
