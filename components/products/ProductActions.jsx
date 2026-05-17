@@ -41,6 +41,9 @@ export default function ProductActions({ product }) {
           <label className="block font-medium text-gray-900 mb-2">
             Size
             {!selectedSize && <span className="text-red-500 text-sm ml-1">*</span>}
+            {selectedSize && (
+              <span className="text-sm font-normal text-gray-600 ml-2">{selectedSize}</span>
+            )}
           </label>
           <div className="flex flex-wrap gap-2">
             {sizes.map((size) => (
@@ -71,26 +74,30 @@ export default function ProductActions({ product }) {
               <span className="text-sm font-normal text-gray-600 ml-2">{selectedColor}</span>
             )}
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {colors.map((color) => {
-              // Try to render a colour swatch for simple CSS colour names / hex values
-              const isHex = /^#([0-9a-f]{3}){1,2}$/i.test(color);
+              const isSelected = selectedColor === color;
               return (
                 <button
                   key={color}
                   type="button"
                   title={color}
                   onClick={() => setSelectedColor(color === selectedColor ? null : color)}
-                  className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                    selectedColor === color
-                      ? "border-gray-900 scale-110"
-                      : "border-gray-300 hover:border-gray-500"
-                  }`}
-                  style={isHex ? { backgroundColor: color } : undefined}
+                  className={`flex flex-col items-center gap-1 group focus:outline-none`}
                 >
-                  {!isHex && (
-                    <span className="text-xs leading-none">{color.slice(0, 2).toUpperCase()}</span>
-                  )}
+                  <span
+                    className={`w-8 h-8 rounded-full border-2 transition-all block ${
+                      isSelected
+                        ? "border-gray-900 scale-110 shadow-md"
+                        : "border-gray-300 hover:border-gray-500"
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className={`text-[10px] leading-none max-w-10 truncate ${
+                    isSelected ? "text-gray-900 font-medium" : "text-gray-500"
+                  }`}>
+                    {color}
+                  </span>
                 </button>
               );
             })}

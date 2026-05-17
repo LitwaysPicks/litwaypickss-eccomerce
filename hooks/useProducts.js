@@ -157,7 +157,10 @@ export function useProducts({ search = "", category = "", page = 0 } = {}) {
 
   // ── Delete (optimistic) ──────────────────────────────────────────────────
   const deleteProduct = useMutation({
-    mutationFn: (productId) => deleteProductAction(productId),
+    mutationFn: async (productId) => {
+      const result = await deleteProductAction(productId);
+      if (result?.error) throw new Error(result.error);
+    },
     onMutate: async (productId) => {
       // Cancel in-flight fetches so they don't overwrite the optimistic update
       await queryClient.cancelQueries({ queryKey: ["admin-products"] });

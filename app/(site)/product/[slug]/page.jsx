@@ -92,7 +92,7 @@ export default async function ProductPage({ params }) {
   if (rawReviews.length > 0) {
     const userIds = [...new Set(rawReviews.map((r) => r.user_id))];
     const { data: profiles } = await admin
-      .from("profiles")
+      .from("users")
       .select("id, first_name, last_name")
       .in("id", userIds);
     const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
