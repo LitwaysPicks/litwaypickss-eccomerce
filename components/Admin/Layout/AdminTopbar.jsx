@@ -182,11 +182,17 @@ export default function AdminTopbar({ onMenuClick }) {
                     const dot  = TYPE_DOT[n.type]  ?? TYPE_DOT.default;
                     const linkHref =
                       n.type === "order_placed" || n.type === "order_failed"
-                        ? "/admin/orders"
+                        ? n.data?.order_id
+                          ? `/admin/orders?order=${n.data.order_id}`
+                          : "/admin/orders"
                         : n.type === "new_review"
-                        ? `/admin/products`
+                        ? n.data?.product_slug
+                          ? `/admin/products?product=${n.data.product_slug}`
+                          : "/admin/products"
                         : n.type === "low_stock"
-                        ? "/admin/products"
+                        ? n.data?.product_slug
+                          ? `/admin/products?product=${n.data.product_slug}`
+                          : "/admin/products"
                         : null;
 
                     const Inner = (

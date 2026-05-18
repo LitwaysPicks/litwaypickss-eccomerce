@@ -4,13 +4,14 @@ import { formatCurrency } from "@/lib/currency";
 
 // SUCCESSFUL = payment confirmed by MoMo (awaiting fulfilment)
 // COMPLETED  = admin has fulfilled/delivered the order
-const STATUS_OPTIONS = ["PENDING", "SUCCESSFUL", "COMPLETED", "FAILED", "REFUNDED"];
+const STATUS_OPTIONS = ["PENDING", "SUCCESSFUL", "COMPLETED", "FAILED", "REFUNDED", "DISPUTED"];
 const STATUS_STYLES = {
   SUCCESSFUL: "bg-blue-100 text-blue-700 border-blue-200",
   COMPLETED: "bg-green-100 text-green-700 border-green-200",
   PENDING: "bg-orange-100 text-orange-700 border-orange-200",
   FAILED: "bg-red-100 text-red-700 border-red-200",
   REFUNDED: "bg-purple-100 text-purple-700 border-purple-200",
+  DISPUTED: "bg-yellow-100 text-yellow-700 border-yellow-200",
 };
 
 export default function OrderDetailPanel({ order, onClose, onUpdateStatus, updating }) {
