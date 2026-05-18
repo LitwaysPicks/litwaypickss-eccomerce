@@ -29,7 +29,9 @@ export function useDashboardStats() {
       const [totalRes, pendingRes, revenueRes] = await Promise.all([
         supabase.from("orders").select("id", { count: "exact", head: true }),
         supabase.from("orders").select("id", { count: "exact", head: true }).eq("payment_status", "PENDING"),
-        supabase.from("orders").select("final_total").eq("payment_status", "COMPLETED"),
+        // Revenue = paid (SUCCESSFUL) + fulfilled (COMPLETED). REFUNDED orders
+        // drop out naturally because their status changes away from these two.
+        supabase.from("orders").select("final_total").in("payment_status", ["SUCCESSFUL", "COMPLETED"]),
       ]);
       const totalRevenue = (revenueRes.data ?? []).reduce(
         (sum, o) => sum + Number(o.final_total ?? 0),
@@ -62,7 +64,7 @@ export function useDashboardStats() {
   const revenueByDay = useMemo(() => {
     const byDay = {};
     recentOrders
-      .filter((o) => o.payment_status === "COMPLETED")
+      .filter((o) => o.payment_status === "COMPLETED" || o.payment_status === "SUCCESSFUL")
       .forEach((o) => {
         const day = o.created_at.split("T")[0];
         byDay[day] = (byDay[day] || 0) + Number(o.final_total);

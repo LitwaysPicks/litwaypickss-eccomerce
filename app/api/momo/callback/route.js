@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderPlacedEmails } from "@/lib/email";
+import { notifyOrderPlaced, notifyOrderFailed } from "@/lib/notifications";
 import crypto from "crypto";
 
 /**
@@ -156,6 +157,7 @@ export async function POST(request) {
           sendOrderPlacedEmails(orderForEmail).catch((err) =>
             console.error("Order placed email error:", err.message)
           );
+          notifyOrderPlaced(orderForEmail);
         }
         break;
       }
@@ -163,15 +165,18 @@ export async function POST(request) {
       // REJECTED and TIMEOUT are terminal failure states from MTN MoMo
       case "FAILED":
       case "REJECTED":
-      case "TIMEOUT":
-        await db.from("orders").update({
+      case "TIMEOUT": {
+        const { data: failedRows } = await db.from("orders").update({
           payment_status: "FAILED",
           failure_reason: reason || status || "Unknown",
           callback_received: true,
           callback_data: callbackData,
           last_status_check: new Date().toISOString(),
-        }).or(filter).eq("payment_status", "PENDING");
+        }).or(filter).eq("payment_status", "PENDING").select();
+        const failedOrder = failedRows?.[0];
+        if (failedOrder) notifyOrderFailed(failedOrder);
         break;
+      }
 
       case "PENDING":
       case "CREATED":
