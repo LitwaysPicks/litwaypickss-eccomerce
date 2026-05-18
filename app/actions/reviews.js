@@ -139,13 +139,13 @@ export async function submitReviewAction({ productId, orderId, rating, comment }
         .eq("id", productId);
     }
 
-    const { data: product } = await admin.from("products").select("name").eq("id", productId).single();
+    const { data: product } = await admin.from("products").select("name, slug").eq("id", productId).single();
     const { data: profile } = await admin.from("users").select("first_name, last_name").eq("id", user.id).single();
     const reviewerName = profile
       ? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || "A customer"
       : "A customer";
 
-    notifyNewReview({ productId, productName: product?.name ?? "a product", reviewerName, rating });
+    notifyNewReview({ productId, productSlug: product?.slug, productName: product?.name ?? "a product", reviewerName, rating });
 
     return { data: { success: true } };
   } catch (err) {
