@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Loader2, Eye } from "lucide-react";
 import { useOrders, ORDERS_PAGE_SIZE } from "@/hooks/useOrders";
 import { formatCurrency } from "@/lib/currency";
@@ -22,6 +22,7 @@ const STATUS_STYLES = {
 
 export default function OrdersPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [status, setStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -37,18 +38,25 @@ export default function OrdersPage() {
     status, search: debouncedSearch, page,
   });
 
-  // Auto-open detail panel when navigating from a notification link
+  // Auto-open detail panel when navigating from a notification link.
+  // Strip the ?order= param immediately after opening so revisiting the page
+  // doesn't re-open the panel.
   const targetOrderId = searchParams.get("order");
   useEffect(() => {
     if (!targetOrderId) return;
-    // Check current page first
+
+    const open = (order) => {
+      setSelectedOrder(order);
+      router.replace("/admin/orders", { scroll: false });
+    };
+
     const match = orders.find((o) => o.id === targetOrderId);
-    if (match) { setSelectedOrder(match); return; }
-    // Not on this page — fetch it directly
+    if (match) { open(match); return; }
+
     if (isLoading) return;
     import("@/lib/supabase").then(({ supabase }) => {
       supabase.from("orders").select("*").eq("id", targetOrderId).maybeSingle()
-        .then(({ data }) => { if (data) setSelectedOrder(data); });
+        .then(({ data }) => { if (data) open(data); else router.replace("/admin/orders", { scroll: false }); });
     });
   }, [targetOrderId, orders, isLoading]);
 
