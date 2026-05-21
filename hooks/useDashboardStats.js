@@ -26,21 +26,14 @@ export function useDashboardStats() {
   const { data: orderStats, isLoading: statsLoading } = useQuery({
     queryKey: ["admin-order-stats"],
     queryFn: async () => {
-      const [totalRes, pendingRes, revenueRes] = await Promise.all([
-        supabase.from("orders").select("id", { count: "exact", head: true }),
-        supabase.from("orders").select("id", { count: "exact", head: true }).eq("payment_status", "PENDING"),
-        // Revenue = paid (SUCCESSFUL) + fulfilled (COMPLETED). REFUNDED orders
-        // drop out naturally because their status changes away from these two.
-        supabase.from("orders").select("final_total").in("payment_status", ["SUCCESSFUL", "COMPLETED"]),
-      ]);
-      const totalRevenue = (revenueRes.data ?? []).reduce(
-        (sum, o) => sum + Number(o.final_total ?? 0),
-        0,
-      );
+      // Single RPC call — aggregation done in Postgres, not in the browser.
+      // Previously this fetched every final_total row and summed in JS.
+      const { data, error } = await supabase.rpc("get_order_stats");
+      if (error) throw error;
       return {
-        totalOrders: totalRes.count ?? 0,
-        pendingOrders: pendingRes.count ?? 0,
-        totalRevenue,
+        totalOrders: data?.total_orders ?? 0,
+        pendingOrders: data?.pending_orders ?? 0,
+        totalRevenue: Number(data?.total_revenue ?? 0),
       };
     },
     staleTime: 60_000,

@@ -249,6 +249,7 @@ function CheckoutContent() {
 
       setReferenceId(data.referenceId);
       setOrderId(data.orderId);
+      setLoading(false); // submission complete — polling takes over
       toast.success("Payment request sent to your phone!", {
         icon: <Smartphone className="h-5 w-5" />,
       });

@@ -101,9 +101,11 @@ export async function GET(request, { params }) {
     // callback can race here without both crossing the side-effect line.
     // The row updates iff payment_status is still PENDING; otherwise no row
     // is returned and we skip emails/notifications.
+    // NOTE: Supabase builder is immutable — each .eq() returns a new object,
+    // so we must reassign rather than chain onto the discarded return value.
     const isTerminal = ["SUCCESSFUL", "FAILED", "DISPUTED"].includes(status);
-    const updateQuery = db.from("orders").update(updateData).eq("reference_id", referenceId);
-    if (isTerminal) updateQuery.eq("payment_status", "PENDING");
+    let updateQuery = db.from("orders").update(updateData).eq("reference_id", referenceId);
+    if (isTerminal) updateQuery = updateQuery.eq("payment_status", "PENDING");
     const { data: updated } = await updateQuery.select();
     const transitionedRow = isTerminal && updated && updated.length === 1 ? updated[0] : null;
 
