@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { addCategoryAction, deleteCategoryAction } from "@/app/actions/categories";
+import { addCategoryAction, editCategoryAction, deleteCategoryAction } from "@/app/actions/categories";
 
 export function useCategories() {
   const queryClient = useQueryClient();
@@ -60,5 +60,28 @@ export function useCategories() {
     },
   });
 
-  return { categories, isLoading, addCategory, deleteCategory };
+  const updateCategory = useMutation({
+    mutationFn: async ({ id, updates }) => {
+      const result = await editCategoryAction(id, updates);
+      if (result?.error) throw new Error(result.error);
+    },
+    onMutate: async ({ id, updates }) => {
+      await queryClient.cancelQueries({ queryKey: ["admin-categories"] });
+      const previous = queryClient.getQueryData(["admin-categories"]);
+      queryClient.setQueryData(["admin-categories"], (old = []) =>
+        old.map((c) => (c.id === id ? { ...c, ...updates } : c))
+      );
+      return { previous };
+    },
+    onError: (err, _vars, context) => {
+      queryClient.setQueryData(["admin-categories"], context?.previous);
+      toast.error(err.message || "Failed to update category");
+    },
+    onSuccess: () => {
+      toast.success("Category updated");
+      invalidate();
+    },
+  });
+
+  return { categories, isLoading, addCategory, updateCategory, deleteCategory };
 }
