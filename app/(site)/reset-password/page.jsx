@@ -18,29 +18,44 @@ function ResetPasswordContent() {
   // "verifying" | "valid" | "invalid"
   const [tokenStatus, setTokenStatus] = useState("verifying");
 
-  // Supabase JS v2 uses PKCE by default. The reset email redirects here with
-  // ?token_hash=...&type=recovery in the query string. We must call verifyOtp
-  // to exchange that hash for a live recovery session before updateUser works.
-  // This stays client-side because it requires the URL params from the browser.
+  // Reset links can arrive in three shapes depending on the email template
+  // and which client sent the request (website = PKCE, mobile app = implicit):
+  //   ?token_hash=...&type=recovery   (custom template)
+  //   ?code=...                       (default template, PKCE)
+  //   #access_token=...&refresh_token (default template, implicit)
+  // Each is exchanged for a recovery session before updateUser can run.
   useEffect(() => {
     const token_hash = searchParams.get("token_hash");
     const type = searchParams.get("type");
+    const code = searchParams.get("code");
+    const hash = new URLSearchParams(
+      typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : ""
+    );
+    const access_token = hash.get("access_token");
+    const refresh_token = hash.get("refresh_token");
 
-    if (!token_hash || type !== "recovery") {
+    let attempt;
+    if (token_hash && type === "recovery") {
+      attempt = supabase.auth.verifyOtp({ token_hash, type: "recovery" });
+    } else if (code) {
+      attempt = supabase.auth.exchangeCodeForSession(code);
+    } else if (access_token && refresh_token) {
+      attempt = supabase.auth.setSession({ access_token, refresh_token });
+    } else {
       setTokenStatus("invalid");
       return;
     }
 
-    supabase.auth
-      .verifyOtp({ token_hash, type: "recovery" })
-      .then(({ error }) => {
-        if (error) {
-          setTokenStatus("invalid");
-          toast.error(error.message || "Reset link is invalid or has expired.");
-        } else {
-          setTokenStatus("valid");
-        }
-      });
+    attempt.then(({ error }) => {
+      if (error) {
+        setTokenStatus("invalid");
+        toast.error(error.message || "Reset link is invalid or has expired.");
+      } else {
+        // Drop tokens from the address bar so they aren't left in history.
+        window.history.replaceState(null, "", window.location.pathname);
+        setTokenStatus("valid");
+      }
+    });
   }, [searchParams]);
 
   const resetMutation = useMutation({

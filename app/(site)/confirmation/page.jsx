@@ -158,7 +158,7 @@ function ConfirmationContent() {
             <ul className="text-left text-blue-800 text-sm space-y-1">
               <li>✅ Your order is confirmed and being prepared</li>
               <li>✅ You&apos;ll receive tracking information via email</li>
-              <li>✅ Delivery within 1-3 business days</li>
+              <li>✅ Delivery within 24 hours in Montserrado, 2–7 business days elsewhere</li>
             </ul>
           </div>
 

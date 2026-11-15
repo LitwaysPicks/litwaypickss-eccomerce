@@ -14,6 +14,7 @@ import {
 
 const TITLES = {
   "/admin": "Dashboard",
+  "/admin/analytics": "Analytics",
   "/admin/products": "Products",
   "/admin/orders": "Orders",
   "/admin/customers": "Customers",
@@ -22,6 +23,7 @@ const TITLES = {
 
 const BREADCRUMBS = {
   "/admin": [{ label: "Dashboard" }],
+  "/admin/analytics": [{ label: "Overview" }, { label: "Analytics" }],
   "/admin/products": [{ label: "Catalog" }, { label: "Products" }],
   "/admin/orders": [{ label: "Commerce" }, { label: "Orders" }],
   "/admin/customers": [{ label: "Commerce" }, { label: "Customers" }],

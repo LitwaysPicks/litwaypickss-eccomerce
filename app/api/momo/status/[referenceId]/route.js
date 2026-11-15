@@ -1,3 +1,4 @@
+import { deductStockForOrder } from "@/lib/stock";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAccessToken, fetchTransactionDetails } from "@/lib/momo/service";
@@ -138,6 +139,9 @@ export async function GET(request, { params }) {
     if (isTerminal) updateQuery = updateQuery.eq("payment_status", "PENDING");
     const { data: updated } = await updateQuery.select();
     const transitionedRow = isTerminal && updated && updated.length === 1 ? updated[0] : null;
+    if (transitionedRow && status === "SUCCESSFUL") {
+      await deductStockForOrder(db, transitionedRow.id);
+    }
 
     if (transitionedRow && transitionedRow.customer_email) {
       const orderForEmail = {
@@ -147,12 +151,12 @@ export async function GET(request, { params }) {
       };
 
       if (status === "SUCCESSFUL") {
-        sendOrderPlacedEmails(orderForEmail).catch((err) =>
+        await sendOrderPlacedEmails(orderForEmail).catch((err) =>
           console.error("Order placed email error:", err.message)
         );
         notifyOrderPlaced(orderForEmail);
       } else if (status === "FAILED") {
-        sendOrderFailedEmails(orderForEmail).catch((err) =>
+        await sendOrderFailedEmails(orderForEmail).catch((err) =>
           console.error("Order failed email error:", err.message)
         );
         notifyOrderFailed(orderForEmail);

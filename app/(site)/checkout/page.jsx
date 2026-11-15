@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { track } from "@/lib/analytics";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -230,6 +231,11 @@ function CheckoutContent() {
 
   // Pre-fill from the account profile once it resolves. Only fills blanks so
   // it never clobbers something the customer already typed.
+  // Funnel step for the admin Analytics page — once per checkout visit.
+  useEffect(() => {
+    track("checkout_start");
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     setFormData((prev) => ({
@@ -938,7 +944,7 @@ function CheckoutContent() {
                 <p className="font-semibold text-green-900">
                   Free delivery nationwide
                 </p>
-                <p className="text-green-700">Arrives in 1–3 business days</p>
+                <p className="text-green-700">Montserrado: 24 hours · Other counties: 2–7 business days</p>
               </div>
             </div>
 

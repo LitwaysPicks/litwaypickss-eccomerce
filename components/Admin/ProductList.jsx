@@ -3,6 +3,14 @@
 import React from "react";
 import { formatCurrency } from "@/lib/currency";
 
+function HiddenBadge() {
+  return (
+    <span className="inline-flex shrink-0 items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+      Hidden
+    </span>
+  );
+}
+
 function StockBadge({ stock }) {
   if (stock === 0)
     return <span className="text-xs font-medium text-rose-600">Out of stock</span>;
@@ -15,6 +23,7 @@ export default function ProductList({
   products,
   onEdit,
   onDelete,
+  onToggleHidden,
   deletingId,
   onConfirmDelete,
   onCancelDelete,
@@ -40,7 +49,7 @@ export default function ProductList({
               <div key={product.id} className="bg-rose-50/60 px-4 py-4">
                 <p className="text-sm text-gray-700 mb-3">
                   Remove <span className="font-semibold text-gray-900">{product.name}</span>?{" "}
-                  <span className="text-gray-500">This cannot be undone.</span>
+                  <span className="text-gray-500">This cannot be undone. To keep it but stop selling it, use Hide instead.</span>
                 </p>
                 <div className="flex items-center gap-3">
                   <button
@@ -70,7 +79,10 @@ export default function ProductList({
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-gray-900 truncate text-sm">{product.name}</p>
+                <div className="flex items-center gap-2 min-w-0">
+                  <p className="font-medium text-gray-900 truncate text-sm">{product.name}</p>
+                  {product.is_hidden && <HiddenBadge />}
+                </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-xs text-gray-500 tabular-nums">{formatCurrency(product.price)}</span>
                   <span className="text-gray-300">·</span>
@@ -83,6 +95,12 @@ export default function ProductList({
                   className="text-xs font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-md px-2.5 py-1.5 transition-colors"
                 >
                   Edit
+                </button>
+                <button
+                  onClick={() => onToggleHidden(product)}
+                  className="text-xs font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-md px-2.5 py-1.5 transition-colors"
+                >
+                  {product.is_hidden ? "Unhide" : "Hide"}
                 </button>
                 <button
                   onClick={() => onDelete(product.id)}
@@ -106,7 +124,7 @@ export default function ProductList({
               <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-widest text-gray-400 hidden lg:table-cell">Variants</th>
               <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-widest text-gray-400">Price</th>
               <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-widest text-gray-400">Stock</th>
-              <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-widest text-gray-400 w-32"></th>
+              <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-widest text-gray-400 w-44"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -121,7 +139,7 @@ export default function ProductList({
                         <p className="text-sm text-gray-700">
                           Remove{" "}
                           <span className="font-semibold text-gray-900">{product.name}</span>?{" "}
-                          <span className="text-gray-500">This cannot be undone.</span>
+                          <span className="text-gray-500">This cannot be undone. To keep it but stop selling it, use Hide instead.</span>
                         </p>
                         <div className="flex items-center gap-3 shrink-0">
                           <button
@@ -160,7 +178,10 @@ export default function ProductList({
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-gray-900 truncate max-w-50">{product.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-gray-900 truncate max-w-50">{product.name}</p>
+                          {product.is_hidden && <HiddenBadge />}
+                        </div>
                         {product.brand && (
                           <p className="text-xs text-gray-400 truncate">{product.brand}</p>
                         )}
@@ -227,6 +248,12 @@ export default function ProductList({
                         className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                       >
                         Edit
+                      </button>
+                      <button
+                        onClick={() => onToggleHidden(product)}
+                        className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                      >
+                        {product.is_hidden ? "Unhide" : "Hide"}
                       </button>
                       <button
                         onClick={() => onDelete(product.id)}

@@ -7,7 +7,7 @@ import { queryClient } from "@/lib/queryClient";
 import { logoutUser } from "@/lib/auth";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Settings,
-  LogOut, Tag,
+  LogOut, Tag, BarChart3,
 } from "lucide-react";
 
 const NAV = [
@@ -15,6 +15,7 @@ const NAV = [
     group: "Overview",
     items: [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
     ],
   },
   {

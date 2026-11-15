@@ -11,7 +11,7 @@ import {
 export const metadata = {
   title: "Shipping & Delivery | LitwayPicks",
   description:
-    "Free nationwide delivery across all 15 counties in Liberia. Orders processed within 1-2 business days.",
+    "Free nationwide delivery across all 15 counties in Liberia. Montserrado within 24 hours; all other counties in 2–7 business days.",
 };
 
 export default function ShippingPage() {
@@ -46,9 +46,9 @@ export default function ShippingPage() {
           },
           {
             icon: Clock,
-            title: "1–2 Day Processing",
+            title: "Fast Delivery",
             description:
-              "Orders are processed within 1-2 business days of placement.",
+              "Montserrado within 24 hours. Other counties in 2–7 business days.",
             gradient: "from-blue-500 to-blue-600",
             bg: "from-blue-50 to-blue-100",
           },
@@ -89,17 +89,22 @@ export default function ShippingPage() {
               <Clock className="h-5 w-5 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900">
-              Processing Time
+              Delivery Timeline
             </h2>
           </div>
-          <p className="text-gray-700 leading-relaxed mb-4">
-            All orders are processed within <strong>1–2 business days</strong>{" "}
-            after your order is placed and payment is confirmed.
-          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className="rounded-2xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">Montserrado</p>
+              <p className="text-2xl font-bold text-gray-900">24 hours</p>
+            </div>
+            <div className="rounded-2xl border border-gray-200 p-5">
+              <p className="text-sm text-gray-500 mb-1">All other counties</p>
+              <p className="text-2xl font-bold text-gray-900">2–7 business days</p>
+            </div>
+          </div>
           <ul className="space-y-2">
             {[
-              "Orders placed Monday–Friday before 5:00 PM are processed the same or next business day.",
-              "Orders placed on weekends or public holidays are processed the next business day.",
+              "Delivery times start once your order is placed and payment is confirmed.",
               "You will receive a confirmation notification once your order has been dispatched.",
             ].map((point, i) => (
               <li
@@ -199,7 +204,7 @@ export default function ShippingPage() {
                 Customer Support
               </p>
               <p className="text-gray-600 text-sm">
-                +231-888-464-940 (Phone / WhatsApp)
+                +231-888-640-502 (Phone / WhatsApp)
               </p>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { track } from "@/lib/analytics";
 import { ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useWishlist } from "@/lib/wishlist-context";
@@ -13,6 +14,10 @@ export default function ProductActions({ product }) {
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
+
+  useEffect(() => {
+    track("product_view", product.id);
+  }, [product.id]);
 
   const sizes = Array.isArray(product.sizes) ? product.sizes : [];
   const colors = Array.isArray(product.colors) ? product.colors : [];

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Eye, Cookie, Lock, UserCheck, Phone } from "lucide-react";
+import { Shield, Eye, Cookie, Lock, UserCheck, Phone, BarChart3 } from "lucide-react";
 
 export const metadata = {
   title: "Privacy Policy | LitwayPicks",
@@ -7,7 +7,7 @@ export const metadata = {
     "LitwayPicks privacy policy — how we collect, use, and protect your personal information.",
 };
 
-const lastUpdated = "March 2025";
+const lastUpdated = "November 2026";
 
 export default function PrivacyPage() {
   return (
@@ -206,6 +206,41 @@ export default function PrivacyPage() {
           </p>
         </div>
 
+        {/* Usage statistics */}
+        <div className="card-elevated p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 rounded-xl shadow">
+              <BarChart3 className="h-5 w-5 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Usage Statistics</h2>
+          </div>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            To understand how customers use our website and mobile app — and to
+            make them better — we collect anonymous usage statistics. We record:
+          </p>
+          <ul className="space-y-2 text-gray-700 text-sm mb-4">
+            {[
+              "When the website or app is opened",
+              "Which products are viewed",
+              "When items are added to the cart and when checkout is started",
+              "Whether you are using the website, the Android app, or the iPhone app",
+            ].map((item, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" />
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="text-gray-600 text-sm leading-relaxed">
+            Each device or browser is identified by a random code, linked to
+            your account only while you are signed in. We do not record your
+            name, email, phone number, or what you type. These statistics are
+            viewed only by the LitwayPicks team as totals, are never sold or
+            shared for advertising, and are stored securely with our database
+            provider, Supabase.
+          </p>
+        </div>
+
         {/* Security */}
         <div className="card-elevated p-8">
           <div className="flex items-center gap-3 mb-4">
@@ -281,7 +316,7 @@ export default function PrivacyPage() {
                 <p className="font-semibold text-gray-900 text-sm">
                   Phone / WhatsApp
                 </p>
-                <p className="text-gray-600 text-sm">+231-888-464-940</p>
+                <p className="text-gray-600 text-sm">+231-888-640-502</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">

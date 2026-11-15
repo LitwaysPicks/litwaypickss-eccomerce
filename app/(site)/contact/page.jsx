@@ -41,13 +41,13 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: "Phone",
-      details: "+231-888-464-940",
+      details: "+231-888-640-502",
       description: "Call us Monday to Friday, 8AM - 6PM",
     },
     {
       icon: MessageCircle,
       title: "WhatsApp",
-      details: "+231-888-464-940",
+      details: "+231-888-640-502",
       description: "Message us anytime for quick support",
     },
     {
@@ -67,7 +67,7 @@ export default function ContactPage() {
     {
       question: "How long does delivery take?",
       answer:
-        "We deliver nationwide within 1-3 business days. Monrovia and surrounding areas typically receive orders within 24 hours.",
+        "We deliver nationwide. Montserrado orders arrive within 24 hours; all other counties take 2–7 business days.",
     },
     {
       question: "Is delivery really free?",
@@ -82,7 +82,7 @@ export default function ContactPage() {
     {
       question: "Can I return or exchange items?",
       answer:
-        "Yes, we have a 7-day return policy. Items must be in original condition with packaging.",
+        "Yes — returns are accepted within 48 hours of delivery for unused items in their original condition. A 10% deduction applies to eligible refunds.",
     },
   ];
 

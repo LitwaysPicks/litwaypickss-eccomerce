@@ -190,10 +190,12 @@ export default async function ProductPage({ params }) {
           <p className="text-gray-700 leading-relaxed">{product.description}</p>
 
           {/* Stock */}
-          <p className={`font-medium ${product.stock > 0 ? "text-green-600" : "text-red-600"}`}>
-            {product.stock > 0
+          <p className={`font-medium ${product.stock > 5 ? "text-green-600" : product.stock > 0 ? "text-amber-600" : "text-red-600"}`}>
+            {product.stock > 5
               ? `✓ In Stock (${product.stock} available)`
-              : "✗ Out of Stock"}
+              : product.stock > 0
+                ? `Only ${product.stock} left — order soon`
+                : "✗ Out of Stock"}
           </p>
 
           {/* Category */}
@@ -238,7 +240,7 @@ export default async function ProductPage({ params }) {
             </div>
             <div className="flex items-center space-x-3 text-sm text-gray-600">
               <RotateCcw className="h-5 w-5 text-primary-600" />
-              <span>7-day return policy</span>
+              <span>48-hour return policy</span>
             </div>
           </div>
         </div>

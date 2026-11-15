@@ -68,7 +68,9 @@ export async function POST(request) {
 
     const { data: products, error: productsError } = await db
       .from("products")
-      .select("id, name, price, sale_price, stock")
+      // "*" rather than a column list so this keeps working whether or not
+      // the is_hidden migration has run yet.
+      .select("*")
       .in("id", itemIds);
 
     if (productsError) {
@@ -85,7 +87,7 @@ export async function POST(request) {
     const verifiedItems = [];
     for (const item of items) {
       const product = productMap.get(item.id);
-      if (!product) {
+      if (!product || product.is_hidden === true) {
         return NextResponse.json(
           { success: false, message: `Product not available: ${item.name || item.id}` },
           { status: 400 },

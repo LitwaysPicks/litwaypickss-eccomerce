@@ -1,3 +1,4 @@
+import { deductStockForOrder } from "@/lib/stock";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderPlacedEmails } from "@/lib/email";
@@ -149,12 +150,13 @@ export async function POST(request) {
         }).or(filter).eq("payment_status", "PENDING").select();
 
         const transitionedRow = updated && updated.length === 1 ? updated[0] : null;
+        if (transitionedRow) await deductStockForOrder(db, transitionedRow.id);
         if (transitionedRow && transitionedRow.customer_email) {
           const orderForEmail = {
             ...transitionedRow,
             financial_transaction_id: financialTransactionId,
           };
-          sendOrderPlacedEmails(orderForEmail).catch((err) =>
+          await sendOrderPlacedEmails(orderForEmail).catch((err) =>
             console.error("Order placed email error:", err.message)
           );
           notifyOrderPlaced(orderForEmail);

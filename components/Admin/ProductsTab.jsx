@@ -45,6 +45,7 @@ export default function ProductsTab() {
     addProduct,
     updateProduct,
     deleteProduct,
+    toggleHidden,
     loadProductForEdit,
   } = useProducts({ search: debouncedSearch, category: selectedCategory, page });
 
@@ -143,6 +144,9 @@ export default function ProductsTab() {
             products={products}
             onEdit={handleEditProduct}
             onDelete={setDeletingId}
+            onToggleHidden={(product) =>
+              toggleHidden.mutate({ productId: product.id, hidden: !product.is_hidden })
+            }
             deletingId={deletingId}
             onConfirmDelete={handleConfirmDelete}
             onCancelDelete={() => setDeletingId(null)}

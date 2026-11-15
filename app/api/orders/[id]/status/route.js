@@ -60,7 +60,7 @@ export async function PATCH(request, { params }) {
 
       const name = `${order.customer_first_name} ${order.customer_last_name}`.trim();
       if (status === "COMPLETED") {
-        sendOrderCompletedEmails(updatedOrder).catch((err) =>
+        await sendOrderCompletedEmails(updatedOrder).catch((err) =>
           console.error("Order completed email error:", err.message)
         );
         createAdminNotification({
@@ -70,7 +70,7 @@ export async function PATCH(request, { params }) {
           data: { order_id: order.id, external_id: order.external_id },
         });
       } else if (status === "REFUNDED") {
-        sendOrderRefundedEmails(updatedOrder).catch((err) =>
+        await sendOrderRefundedEmails(updatedOrder).catch((err) =>
           console.error("Order refunded email error:", err.message)
         );
         createAdminNotification({
@@ -80,7 +80,7 @@ export async function PATCH(request, { params }) {
           data: { order_id: order.id, external_id: order.external_id },
         });
       } else if (status === "FAILED") {
-        sendOrderFailedEmails(updatedOrder).catch((err) =>
+        await sendOrderFailedEmails(updatedOrder).catch((err) =>
           console.error("Order failed email error:", err.message)
         );
         createAdminNotification({

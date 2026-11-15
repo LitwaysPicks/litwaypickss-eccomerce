@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { track } from "@/lib/analytics"
 import { toast } from 'sonner'
 import { supabase } from './supabase'
 import { buildCartItem, makeCartKey, normalizeCartItems } from './cart-contract'
@@ -79,6 +80,7 @@ export function CartProvider({ children }) {
 
   // Variants (size, color) create distinct cart entries via a composite cartKey.
   const addItem = (product, qty = 1, variant = {}) => {
+    track("add_to_cart", product?.id)
     const { size = null, color = null } = variant
     const cartKey = makeCartKey(product.id, size, color)
 

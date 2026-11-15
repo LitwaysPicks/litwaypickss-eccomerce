@@ -129,7 +129,7 @@ export default function Footer() {
             <address className="not-italic space-y-3 text-sm text-gray-400">
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-gray-500 shrink-0" />
-                <span>+231-888-464-940</span>
+                <span>+231-888-640-502</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-gray-500 shrink-0" />

@@ -12,7 +12,7 @@ import {
 export const metadata = {
   title: "Return & Refund Policy | LitwayPicks",
   description:
-    "7-day return policy on all eligible items. Refunds processed within 3 business days to your original payment method.",
+    "Returns accepted within 48 hours of delivery for unused items in original condition. A 10% deduction applies; refunds processed within 72 hours.",
 };
 
 export default function ReturnsPage() {
@@ -23,7 +23,7 @@ export default function ReturnsPage() {
         <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-100 to-orange-100 rounded-full px-6 py-2 mb-6">
           <RefreshCw className="h-4 w-4 text-primary-600" />
           <span className="text-primary-600 font-semibold text-sm">
-            7-DAY RETURNS
+            48-HOUR RETURNS
           </span>
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -40,17 +40,17 @@ export default function ReturnsPage() {
         {[
           {
             icon: Clock,
-            title: "7-Day Window",
+            title: "48-Hour Window",
             description:
-              "You have 7 days after receiving your item to request a return.",
+              "Returns are accepted within 48 hours of delivery.",
             gradient: "from-primary-500 to-primary-600",
             bg: "from-primary-50 to-orange-100",
           },
           {
             icon: RefreshCw,
-            title: "Easy Returns",
+            title: "10% Deduction",
             description:
-              "Contact our team and we'll guide you through every step.",
+              "A 10% deduction of the original purchase amount applies to all eligible refunds.",
             gradient: "from-blue-500 to-blue-600",
             bg: "from-blue-50 to-blue-100",
           },
@@ -58,7 +58,7 @@ export default function ReturnsPage() {
             icon: Package,
             title: "Fast Refunds",
             description:
-              "Approved refunds are processed within 3 business days.",
+              "Refunds are processed within 72 hours after the item is received, inspected, and confirmed.",
             gradient: "from-green-500 to-green-600",
             bg: "from-green-50 to-green-100",
           },
@@ -93,8 +93,8 @@ export default function ReturnsPage() {
             <h2 className="text-2xl font-bold text-gray-900">Return Window</h2>
           </div>
           <p className="text-gray-700 leading-relaxed">
-            We offer a <strong>7-day return policy</strong>. You have 7 days
-            after receiving your item to request a return. Returns requested
+            Returns are accepted within <strong>48 hours of delivery</strong>{" "}
+            for unused items in their original condition. Returns requested
             after this window will not be accepted.
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function ReturnsPage() {
               "In the same condition as received — unworn or unused",
               "With all original tags still attached",
               "In its original packaging",
-              "Returned within 7 days of delivery",
+              "Returned within 48 hours of delivery",
             ].map((point, i) => (
               <li key={i} className="flex items-start gap-3 text-gray-700">
                 <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
@@ -161,15 +161,17 @@ export default function ReturnsPage() {
             <h2 className="text-2xl font-bold text-gray-900">Refund Process</h2>
           </div>
           <p className="text-gray-700 leading-relaxed mb-5">
-            Once we receive and inspect your returned item, we will notify you
-            of the outcome. Here's how the process works:
+            A <strong>10% deduction</strong> of the original purchase amount
+            will apply to all eligible refunds. Refunds are processed within{" "}
+            <strong>72 hours</strong> after the returned item has been
+            received, inspected, and confirmed. Here's how the process works:
           </p>
           <div className="space-y-4">
             {[
               {
                 step: "1",
                 label: "Request Return",
-                desc: "Contact us within 7 days of receiving your order via phone or WhatsApp.",
+                desc: "Contact us within 48 hours of delivery via phone or WhatsApp.",
               },
               {
                 step: "2",
@@ -179,12 +181,12 @@ export default function ReturnsPage() {
               {
                 step: "3",
                 label: "Inspection",
-                desc: "We inspect the returned item and notify you of the outcome within 1 business day.",
+                desc: "Once we receive your item, we inspect it and confirm it meets the return conditions.",
               },
               {
                 step: "4",
                 label: "Refund Issued",
-                desc: "If approved, a refund is issued to your original payment method within 3 business days.",
+                desc: "Your refund (less a 10% deduction) is issued to your original payment method within 72 hours of confirmation.",
               },
             ].map((s) => (
               <div key={s.step} className="flex items-start gap-4">
@@ -248,7 +250,7 @@ export default function ReturnsPage() {
                 <p className="font-semibold text-gray-900 text-sm">
                   Phone / WhatsApp
                 </p>
-                <p className="text-gray-600 text-sm">+231-888-464-940</p>
+                <p className="text-gray-600 text-sm">+231-888-640-502</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">

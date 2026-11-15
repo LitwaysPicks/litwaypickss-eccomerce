@@ -28,8 +28,20 @@ async function fetchProducts({ search, category, page }) {
   const { data, error, count } = await query;
   if (error) throw error;
 
+  // is_hidden lives on the products table, not the catalog view. If the
+  // column doesn't exist yet (migration not run), treat everything as visible.
+  const hiddenIds = new Set();
+  const ids = data.map((p) => p.id);
+  if (ids.length > 0) {
+    const { data: flags, error: flagsError } = await supabase
+      .from("products")
+      .select("id, is_hidden")
+      .in("id", ids);
+    if (!flagsError) flags.forEach((f) => f.is_hidden && hiddenIds.add(f.id));
+  }
+
   return {
-    products: data.map((p) => ({ ...p, images: p.image_urls ?? [] })),
+    products: data.map((p) => ({ ...p, images: p.image_urls ?? [], is_hidden: hiddenIds.has(p.id) })),
     totalCount: count ?? 0,
   };
 }
@@ -155,6 +167,24 @@ export function useProducts({ search = "", category = "", page = 0 } = {}) {
     onError: () => toast.error("Failed to update product"),
   });
 
+  // ── Hide / unhide ────────────────────────────────────────────────────────
+  // Hidden products stay in the database (and in past orders) but customers
+  // can't see or buy them. Use this instead of deleting sold-out products.
+  const toggleHidden = useMutation({
+    mutationFn: async ({ productId, hidden }) => {
+      const { error } = await supabase
+        .from("products")
+        .update({ is_hidden: hidden })
+        .eq("id", productId);
+      if (error) throw error;
+    },
+    onSuccess: (_data, { hidden }) => {
+      toast.success(hidden ? "Product hidden from customers" : "Product is visible again");
+      invalidateAll();
+    },
+    onError: () => toast.error("Failed to update product visibility"),
+  });
+
   // ── Delete (optimistic) ──────────────────────────────────────────────────
   const deleteProduct = useMutation({
     mutationFn: async (productId) => {
@@ -228,6 +258,7 @@ export function useProducts({ search = "", category = "", page = 0 } = {}) {
     addProduct,
     updateProduct,
     deleteProduct,
+    toggleHidden,
     loadProductForEdit,
   };
 }

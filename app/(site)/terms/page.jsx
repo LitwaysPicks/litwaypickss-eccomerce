@@ -90,8 +90,9 @@ export default function TermsPage() {
       content: (
         <div className="space-y-3 text-gray-700 text-sm leading-relaxed">
           <p>
-            All delivery is free nationwide. Orders are processed within 1–2
-            business days. For full details, please refer to our{" "}
+            All delivery is free nationwide. Orders in Montserrado are
+            delivered within 24 hours; all other counties within 2–7 business
+            days. For full details, please refer to our{" "}
             <Link
               href="/shipping"
               className="text-primary-600 hover:underline font-medium"
@@ -115,7 +116,7 @@ export default function TermsPage() {
       content: (
         <div className="text-gray-700 text-sm leading-relaxed">
           <p>
-            We offer a 7-day return policy on eligible items. For full details,
+            Returns are accepted within 48 hours of delivery for unused items in their original condition. A 10% deduction of the original purchase amount applies to all eligible refunds, and refunds are processed within 72 hours after the returned item has been received, inspected, and confirmed. For full details,
             please refer to our{" "}
             <Link
               href="/returns"
@@ -294,7 +295,7 @@ export default function TermsPage() {
                 <p className="font-semibold text-gray-900 text-sm">
                   Phone / WhatsApp
                 </p>
-                <p className="text-gray-600 text-sm">+231-888-464-940</p>
+                <p className="text-gray-600 text-sm">+231-888-640-502</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">

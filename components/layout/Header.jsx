@@ -302,7 +302,7 @@ export default function Header() {
               <span>Free Nationwide Delivery</span>
             </div>
             <div className="hidden md:flex gap-4">
-              <span>+231-888-464-940</span>
+              <span>+231-888-640-502</span>
               <span>WhatsApp Support</span>
               {isAdmin && (
                 <Link

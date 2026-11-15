@@ -48,7 +48,7 @@ export async function retryOrderItemsAction(orderItems) {
     const admin = createAdminClient();
     const { data: products, error } = await admin
       .from("products")
-      .select("id, name, slug, price, sale_price, stock, image_urls")
+      .select("*") // includes is_hidden once that migration has run
       .in("id", ids);
 
     if (error) return { error: error.message };
@@ -59,7 +59,7 @@ export async function retryOrderItemsAction(orderItems) {
 
     for (const item of orderItems) {
       const product = productMap.get(item.id);
-      if (!product || product.stock <= 0) {
+      if (!product || product.is_hidden === true || product.stock <= 0) {
         unavailable.push(item.name || "Unknown item");
       } else {
         available.push({
