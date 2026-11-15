@@ -17,6 +17,9 @@ function ResetPasswordContent() {
   const [showPassword, setShowPassword] = useState(false);
   // "verifying" | "valid" | "invalid"
   const [tokenStatus, setTokenStatus] = useState("verifying");
+  // Shown on the form so the person can confirm whose password they're
+  // changing (guards against being sent a link for someone else's account).
+  const [accountEmail, setAccountEmail] = useState("");
 
   // Reset links can arrive in three shapes depending on the email template
   // and which client sent the request (website = PKCE, mobile app = implicit):
@@ -33,24 +36,28 @@ function ResetPasswordContent() {
     );
     const access_token = hash.get("access_token");
     const refresh_token = hash.get("refresh_token");
+    const hashType = hash.get("type");
 
     let attempt;
     if (token_hash && type === "recovery") {
       attempt = supabase.auth.verifyOtp({ token_hash, type: "recovery" });
     } else if (code) {
       attempt = supabase.auth.exchangeCodeForSession(code);
-    } else if (access_token && refresh_token) {
+    } else if (access_token && refresh_token && hashType === "recovery") {
+      // Only genuine password-recovery links — never arbitrary session tokens.
       attempt = supabase.auth.setSession({ access_token, refresh_token });
     } else {
       setTokenStatus("invalid");
       return;
     }
 
-    attempt.then(({ error }) => {
+    attempt.then(async ({ error }) => {
       if (error) {
         setTokenStatus("invalid");
         toast.error(error.message || "Reset link is invalid or has expired.");
       } else {
+        const { data } = await supabase.auth.getUser();
+        setAccountEmail(data?.user?.email ?? "");
         // Drop tokens from the address bar so they aren't left in history.
         window.history.replaceState(null, "", window.location.pathname);
         setTokenStatus("valid");
@@ -107,7 +114,16 @@ function ResetPasswordContent() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-8">
         <h1 className="text-2xl font-semibold text-gray-900 mb-2">Set New Password</h1>
-        <p className="text-sm text-gray-500 mb-6">Choose a new password for your account.</p>
+        <p className="text-sm text-gray-500 mb-6">
+          {accountEmail ? (
+            <>
+              Choose a new password for <strong className="text-gray-900">{accountEmail}</strong>.
+              If that isn&apos;t your email, close this page.
+            </>
+          ) : (
+            "Choose a new password for your account."
+          )}
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
