@@ -7,6 +7,13 @@ import {
   CheckCircle,
   Phone,
 } from "lucide-react";
+import {
+  CONTACT_PHONE_DISPLAY,
+  CONTACT_EMAIL,
+  CONTACT_PHONE_HREF,
+  CONTACT_WHATSAPP_HREF,
+  CONTACT_EMAIL_HREF,
+} from "@/lib/contact";
 
 export const metadata = {
   title: "Shipping & Delivery | LitwayPicks",
@@ -204,7 +211,23 @@ export default function ShippingPage() {
                 Customer Support
               </p>
               <p className="text-gray-600 text-sm">
-                +231-888-640-502 (Phone / WhatsApp)
+                <a href={CONTACT_PHONE_HREF} className="text-primary-600 hover:underline">
+                  {CONTACT_PHONE_DISPLAY}
+                </a>
+                {" ("}
+                <a href={CONTACT_PHONE_HREF} className="text-primary-600 hover:underline">
+                  Phone
+                </a>
+                {" / "}
+                <a
+                  href={CONTACT_WHATSAPP_HREF}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-600 hover:underline"
+                >
+                  WhatsApp
+                </a>
+                )
               </p>
             </div>
           </div>

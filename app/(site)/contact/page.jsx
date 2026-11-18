@@ -3,6 +3,13 @@
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Clock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  CONTACT_PHONE_DISPLAY,
+  CONTACT_EMAIL,
+  CONTACT_PHONE_HREF,
+  CONTACT_WHATSAPP_HREF,
+  CONTACT_EMAIL_HREF,
+} from "@/lib/contact";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -41,19 +48,23 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: "Phone",
-      details: "+231-888-640-502",
+      details: CONTACT_PHONE_DISPLAY,
+      href: CONTACT_PHONE_HREF,
       description: "Call us Monday to Friday, 8AM - 6PM",
     },
     {
       icon: MessageCircle,
       title: "WhatsApp",
-      details: "+231-888-640-502",
+      details: CONTACT_PHONE_DISPLAY,
+      href: CONTACT_WHATSAPP_HREF,
+      external: true,
       description: "Message us anytime for quick support",
     },
     {
       icon: Mail,
       title: "Email",
-      details: "litwaypicks@gmail.com",
+      details: CONTACT_EMAIL,
+      href: CONTACT_EMAIL_HREF,
       description: "We typically respond within 24 hours",
     },
     {
@@ -107,7 +118,19 @@ export default function ContactPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               {info.title}
             </h3>
-            <p className="font-medium text-primary-600 mb-1">{info.details}</p>
+            {info.href ? (
+              <a
+                href={info.href}
+                {...(info.external
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
+                className="block font-medium text-primary-600 mb-1 hover:underline break-words"
+              >
+                {info.details}
+              </a>
+            ) : (
+              <p className="font-medium text-primary-600 mb-1">{info.details}</p>
+            )}
             <p className="text-sm text-gray-600">{info.description}</p>
           </div>
         ))}
@@ -226,7 +249,15 @@ export default function ContactPage() {
             </div>
           </div>
           <p className="text-sm text-gray-600 mt-4">
-            WhatsApp support available 24/7 for urgent inquiries
+            <a
+              href={CONTACT_WHATSAPP_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:underline"
+            >
+              WhatsApp support
+            </a>{" "}
+            available 24/7 for urgent inquiries
           </p>
         </div>
       </div>

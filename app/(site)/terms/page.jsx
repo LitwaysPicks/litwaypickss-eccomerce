@@ -7,6 +7,13 @@ import {
   Scale,
   Phone,
 } from "lucide-react";
+import {
+  CONTACT_PHONE_DISPLAY,
+  CONTACT_EMAIL,
+  CONTACT_PHONE_HREF,
+  CONTACT_WHATSAPP_HREF,
+  CONTACT_EMAIL_HREF,
+} from "@/lib/contact";
 
 export const metadata = {
   title: "Terms & Conditions | LitwayPicks",
@@ -295,14 +302,31 @@ export default function TermsPage() {
                 <p className="font-semibold text-gray-900 text-sm">
                   Phone / WhatsApp
                 </p>
-                <p className="text-gray-600 text-sm">+231-888-640-502</p>
+                <p className="text-gray-600 text-sm">
+                  <a href={CONTACT_PHONE_HREF} className="text-primary-600 hover:underline">
+                    {CONTACT_PHONE_DISPLAY}
+                  </a>
+                  {" · "}
+                  <a
+                    href={CONTACT_WHATSAPP_HREF}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-600 hover:underline"
+                  >
+                    WhatsApp
+                  </a>
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
               <FileText className="h-5 w-5 text-primary-500 shrink-0" />
               <div>
                 <p className="font-semibold text-gray-900 text-sm">Email</p>
-                <p className="text-gray-600 text-sm">litwaypicks@gmail.com</p>
+                <p className="text-gray-600 text-sm">
+                  <a href={CONTACT_EMAIL_HREF} className="text-primary-600 hover:underline">
+                    {CONTACT_EMAIL}
+                  </a>
+                </p>
               </div>
             </div>
           </div>

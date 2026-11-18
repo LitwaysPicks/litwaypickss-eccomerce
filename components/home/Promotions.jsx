@@ -2,88 +2,115 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Clock, Star } from "lucide-react";
-import { formatCurrency } from "@/lib/currency";
+import { useQuery } from "@tanstack/react-query";
+import { Clock, ArrowRight } from "lucide-react";
+import ProductCard from "@/components/products/ProductCard";
+import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
+import { supabase } from "@/lib/supabase";
+
+const PER_SECTION = 3;
+
+const CARD_COLUMNS = [
+  "id", "name", "slug", "price", "sale_price", "stock",
+  "featured", "image_urls", "category_slug", "category_name",
+  "brand", "rating", "review_count", "created_at", "sizes", "colors",
+].join(",");
+
+const discountOf = (p) =>
+  p.sale_price && p.price ? (p.price - p.sale_price) / p.price : 0;
+
+async function fetchPromotions() {
+  const base = () =>
+    supabase.from("products_with_categories").select(CARD_COLUMNS).gt("stock", 0);
+
+  const [deals, bestSellers, trending] = await Promise.all([
+    base().not("sale_price", "is", null).limit(30),
+    base()
+      .order("review_count", { ascending: false, nullsFirst: false })
+      .order("rating", { ascending: false, nullsFirst: false })
+      .limit(PER_SECTION),
+    base().order("created_at", { ascending: false }).limit(PER_SECTION),
+  ]);
+
+  const firstError = deals.error || bestSellers.error || trending.error;
+  if (firstError) throw firstError;
+
+  // Biggest real discounts first (sale price must actually be below price).
+  const todaysDeals = (deals.data ?? [])
+    .filter((p) => discountOf(p) > 0)
+    .sort((a, b) => discountOf(b) - discountOf(a))
+    .slice(0, PER_SECTION);
+
+  return {
+    deals: todaysDeals,
+    bestSellers: bestSellers.data ?? [],
+    trending: trending.data ?? [],
+  };
+}
+
+// Time left until local midnight, i.e. when "today's" deals roll over.
+function timeUntilMidnight() {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const total = Math.max(0, Math.floor((midnight - now) / 1000));
+  return {
+    hours: Math.floor(total / 3600),
+    minutes: Math.floor((total % 3600) / 60),
+    seconds: total % 60,
+  };
+}
+
+const pad = (n) => String(n).padStart(2, "0");
 
 export default function Promotions() {
-  const [timeLeft, setTimeLeft] = useState({ hours: 23, minutes: 45, seconds: 30 });
+  // Starts null so server and client render the same markup; filled in after mount.
+  const [timeLeft, setTimeLeft] = useState(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
+    const tick = () => setTimeLeft(timeUntilMidnight());
+    const first = setTimeout(tick, 0);
+    const timer = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(timer);
+    };
   }, []);
 
-  const promoSections = [
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["home-promotions"],
+    queryFn: fetchPromotions,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const sections = [
     {
+      key: "deals",
       title: "Today's Deal",
       badge: "Limited Time",
       badgeColor: "bg-red-500",
-      products: [
-        {
-          name: "Wireless Bluetooth Headphones",
-          originalPrice: 150,
-          salePrice: 89,
-          image: "https://images.pexels.com/photos/3945667/pexels-photo-3945667.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
-          rating: 4.8,
-          reviews: 234,
-        },
-      ],
+      href: "/shop",
       hasTimer: true,
     },
     {
+      key: "bestSellers",
       title: "Best Sellers",
       badge: "Top Rated",
       badgeColor: "bg-amber-500",
-      products: [
-        {
-          name: "Premium Cotton T-Shirt",
-          originalPrice: 45,
-          salePrice: 35,
-          image: "https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
-          rating: 4.9,
-          reviews: 456,
-        },
-        {
-          name: "Smart Fitness Watch",
-          originalPrice: 299,
-          salePrice: 199,
-          image: "https://images.pexels.com/photos/437037/pexels-photo-437037.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
-          rating: 4.7,
-          reviews: 189,
-        },
-      ],
+      href: "/shop?sort=rating",
     },
     {
+      key: "trending",
       title: "Trending Now",
       badge: "Hot",
       badgeColor: "bg-orange-500",
-      products: [
-        {
-          name: "Eco-Friendly Water Bottle",
-          originalPrice: 25,
-          salePrice: 18,
-          image: "https://images.pexels.com/photos/3735709/pexels-photo-3735709.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
-          rating: 4.6,
-          reviews: 123,
-        },
-        {
-          name: "Minimalist Backpack",
-          originalPrice: 89,
-          salePrice: 65,
-          image: "https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
-          rating: 4.8,
-          reviews: 298,
-        },
-      ],
+      href: "/shop?sort=newest",
     },
   ];
+
+  // Nothing worth showing (error, or the store has no products yet).
+  if (isError) return null;
+  if (!isLoading && sections.every((s) => !data?.[s.key]?.length)) return null;
 
   return (
     <section className="py-10 md:py-16">
@@ -93,16 +120,12 @@ export default function Promotions() {
       </div>
 
       <div className="space-y-10 md:space-y-12">
-        {promoSections.map((section) => {
-          // cols = products + 1 view-all card, capped at 4
-          const totalCols = Math.min(section.products.length + 1, 4);
-          const gridCols =
-            totalCols === 2 ? "grid-cols-2"
-            : totalCols === 3 ? "grid-cols-2 md:grid-cols-3"
-            : "grid-cols-2 md:grid-cols-4";
+        {sections.map((section) => {
+          const products = data?.[section.key] ?? [];
+          if (!isLoading && products.length === 0) return null;
 
           return (
-            <div key={section.title}>
+            <div key={section.key}>
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2.5">
                   <h3 className="text-lg font-semibold text-gray-900">{section.title}</h3>
@@ -111,58 +134,32 @@ export default function Promotions() {
                   </span>
                 </div>
 
-                {section.hasTimer && (
+                {section.hasTimer && timeLeft && (
                   <div className="flex items-center gap-1.5 text-sm font-semibold tabular-nums text-red-600">
                     <Clock className="h-3.5 w-3.5" />
                     <span>
-                      {String(timeLeft.hours).padStart(2, "0")}:
-                      {String(timeLeft.minutes).padStart(2, "0")}:
-                      {String(timeLeft.seconds).padStart(2, "0")}
+                      {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className={`grid ${gridCols} gap-3 md:gap-4`}>
-                {section.products.map((product, productIndex) => (
-                  <div key={productIndex} className="card overflow-hidden group cursor-pointer">
-                    <div className="relative aspect-4/3 overflow-hidden">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <span className="absolute top-2 left-2 bg-green-600 text-white px-2 py-0.5 rounded text-xs font-semibold">
-                        {Math.round(((product.originalPrice - product.salePrice) / product.originalPrice) * 100)}% OFF
-                      </span>
-                    </div>
-                    <div className="p-3 md:p-4 space-y-2">
-                      <h4 className="font-medium text-sm text-gray-900 line-clamp-2 leading-snug">{product.name}</h4>
-                      <div className="flex items-center gap-1">
-                        <div className="flex">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-3 w-3 ${i < Math.floor(product.rating) ? "text-amber-400 fill-current" : "text-gray-200 fill-current"}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-[10px] text-gray-400">({product.reviews})</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm md:text-base font-bold text-gray-900">{formatCurrency(product.salePrice)}</span>
-                        <span className="text-xs text-gray-400 line-through">{formatCurrency(product.originalPrice)}</span>
-                      </div>
-                      <button className="w-full btn btn-primary text-xs py-1.5">Add to Cart</button>
-                    </div>
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                {isLoading
+                  ? Array.from({ length: PER_SECTION }).map((_, i) => <ProductCardSkeleton key={i} />)
+                  : products.map((product) => <ProductCard key={product.id} product={product} />)}
 
-                {/* View All */}
-                <div className="card flex flex-col items-center justify-center p-4 text-center border-dashed gap-2">
+                {/* View All — the whole card is the link */}
+                <Link
+                  href={section.href}
+                  className="card flex flex-col items-center justify-center p-4 text-center border-dashed gap-3 hover:border-primary-400 hover:bg-primary-50/40 transition-colors"
+                >
                   <p className="font-medium text-sm text-gray-700">View All {section.title}</p>
-                  <Link href="/shop" className="btn btn-outline text-xs">Browse More</Link>
-                </div>
+                  <span className="btn btn-outline text-xs inline-flex items-center gap-1.5">
+                    Browse More
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
               </div>
             </div>
           );

@@ -23,6 +23,13 @@ import { logoutAction } from "@/app/actions/auth";
 import { queryClient } from "@/lib/queryClient";
 import { getSearchSuggestions, getPopularSearchTerms } from "@/data/products";
 import LoginModal from "@/components/auth/LoginModal";
+import {
+  CONTACT_PHONE_DISPLAY,
+  CONTACT_EMAIL,
+  CONTACT_PHONE_HREF,
+  CONTACT_WHATSAPP_HREF,
+  CONTACT_EMAIL_HREF,
+} from "@/lib/contact";
 const categories = [
   { name: "Men's", href: "/shop/mens" },
   { name: "Women's", href: "/shop/womens" },
@@ -302,8 +309,17 @@ export default function Header() {
               <span>Free Nationwide Delivery</span>
             </div>
             <div className="hidden md:flex gap-4">
-              <span>+231-888-640-502</span>
-              <span>WhatsApp Support</span>
+              <a href={CONTACT_PHONE_HREF} className="hover:text-primary-200">
+                {CONTACT_PHONE_DISPLAY}
+              </a>
+              <a
+                href={CONTACT_WHATSAPP_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary-200"
+              >
+                WhatsApp Support
+              </a>
               {isAdmin && (
                 <Link
                   href="/admin"

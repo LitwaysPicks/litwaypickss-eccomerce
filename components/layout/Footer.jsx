@@ -1,6 +1,20 @@
 import React from "react";
 import Link from "next/link";
-import { ShoppingCart, Mail, Phone, MapPin, Smartphone } from "lucide-react";
+import {
+  ShoppingCart,
+  Mail,
+  Phone,
+  MapPin,
+  Smartphone,
+  MessageCircle,
+} from "lucide-react";
+import {
+  CONTACT_PHONE_DISPLAY,
+  CONTACT_EMAIL,
+  CONTACT_PHONE_HREF,
+  CONTACT_WHATSAPP_HREF,
+  CONTACT_EMAIL_HREF,
+} from "@/lib/contact";
 
 function FacebookIcon({ className }) {
   return (
@@ -127,14 +141,29 @@ export default function Footer() {
               Contact Info
             </h4>
             <address className="not-italic space-y-3 text-sm text-gray-400">
-              <div className="flex items-center gap-3">
+              <a
+                href={CONTACT_PHONE_HREF}
+                className="flex items-center gap-3 hover:text-white transition-colors"
+              >
                 <Phone className="h-4 w-4 text-gray-500 shrink-0" />
-                <span>+231-888-640-502</span>
-              </div>
-              <div className="flex items-center gap-3">
+                <span>{CONTACT_PHONE_DISPLAY}</span>
+              </a>
+              <a
+                href={CONTACT_WHATSAPP_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 hover:text-white transition-colors"
+              >
+                <MessageCircle className="h-4 w-4 text-gray-500 shrink-0" />
+                <span>WhatsApp: {CONTACT_PHONE_DISPLAY}</span>
+              </a>
+              <a
+                href={CONTACT_EMAIL_HREF}
+                className="flex items-center gap-3 hover:text-white transition-colors"
+              >
                 <Mail className="h-4 w-4 text-gray-500 shrink-0" />
-                <span>litwaypicks@gmail.com</span>
-              </div>
+                <span>{CONTACT_EMAIL}</span>
+              </a>
               <div className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 text-gray-500 shrink-0 mt-0.5" />
                 <span>
