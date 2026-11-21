@@ -3,11 +3,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOrderCompletedEmails, sendOrderFailedEmails, sendOrderRefundedEmails } from "@/lib/email";
 import { createAdminNotification } from "@/lib/notifications";
 import { requireAdminApi } from "@/lib/api-auth";
+import { deductStockForOrder, restockOrder } from "@/lib/stock";
 
 /**
  * PATCH /api/orders/[id]/status
  * Updates order payment_status (admin only). Sends email notifications
- * when status changes to COMPLETED or REFUNDED.
+ * when status changes to COMPLETED or REFUNDED, and returns items to stock
+ * on REFUNDED/FAILED (taking them out again if moved back to a paid status).
  */
 export async function PATCH(request, { params }) {
   const { response: authResponse } = await requireAdminApi();
@@ -52,6 +54,15 @@ export async function PATCH(request, { params }) {
         { success: false, message: updateError.message },
         { status: 500 }
       );
+    }
+
+    // Keep stock in step with the order: paid statuses hold the items,
+    // refunded/failed ones give them back. Both calls are no-ops when there's
+    // nothing to do, so flipping a status back and forth can't double-count.
+    if (status === "SUCCESSFUL" || status === "COMPLETED") {
+      await deductStockForOrder(db, order.id);
+    } else if (status === "REFUNDED" || status === "FAILED") {
+      await restockOrder(db, order.id);
     }
 
     // Send email notifications for terminal admin-set statuses
