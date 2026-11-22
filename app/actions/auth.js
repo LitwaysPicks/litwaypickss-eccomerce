@@ -64,6 +64,17 @@ export async function signupAction({
     });
     if (error) return { error: error.message };
 
+    // Email already registered. With "Confirm email" on, Supabase hides this
+    // (no error, no email sent) and returns a placeholder user whose
+    // identities list is empty, so the customer would wait for a code that
+    // never arrives.
+    if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      return {
+        error:
+          "An account with this email already exists. Sign in instead, or use “Forgot password” if you can't remember it.",
+      };
+    }
+
     // Email confirmation is on: Supabase has emailed a 6-digit code and
     // there's no session yet. The modal switches to the code screen.
     if (!data.session) {
