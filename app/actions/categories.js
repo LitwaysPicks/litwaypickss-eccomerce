@@ -1,5 +1,7 @@
 "use server";
 
+import { friendlyError } from "@/lib/friendly-error";
+
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
 import { deleteCloudinaryImages } from "@/lib/cloudinary";
@@ -15,11 +17,11 @@ export async function addCategoryAction(categoryData) {
       image: categoryData.image,
       item_count: 0,
     });
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return {};
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to add category." };
+    return { error: friendlyError(err, "Failed to add category.") };
   }
 }
 
@@ -49,11 +51,11 @@ export async function editCategoryAction(categoryId, updates) {
       .update(payload)
       .eq("id", categoryId);
 
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return {};
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to update category." };
+    return { error: friendlyError(err, "Failed to update category.") };
   }
 }
 
@@ -69,7 +71,7 @@ export async function deleteCategoryAction(categoryId) {
       .single();
 
     const { error } = await supabase.from("categories").delete().eq("id", categoryId);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     if (category?.image) {
       await deleteCloudinaryImages([category.image]).catch(() => {});
@@ -78,6 +80,6 @@ export async function deleteCategoryAction(categoryId) {
     return {};
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to delete category." };
+    return { error: friendlyError(err, "Failed to delete category.") };
   }
 }

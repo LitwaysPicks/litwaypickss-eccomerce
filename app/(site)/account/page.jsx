@@ -37,6 +37,7 @@ import { useWishlist } from "@/lib/wishlist-context";
 import { useCart } from "@/lib/cart-context";
 import Link from "next/link";
 import Image from "next/image";
+import { friendlyError } from "@/lib/friendly-error";
 
 function AccountContent() {
   const { user } = useAuth();
@@ -110,7 +111,7 @@ function AccountContent() {
       setReviewForm({ rating: 0, comment: "" });
       refetchReviewable();
     },
-    onError: (err) => toast.error(err.message || "Failed to submit review"),
+    onError: (err) => toast.error(err.message || "We couldn't post your review. Please try again."),
   });
 
   const openReviewModal = (item) => {
@@ -177,7 +178,7 @@ function AccountContent() {
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     },
-    onError: (err) => toast.error(err.message || "Profile update failed"),
+    onError: (err) => toast.error(err.message || "We couldn't save your details. Please try again."),
   });
 
   const logoutMutation = useMutation({
@@ -189,7 +190,7 @@ function AccountContent() {
       queryClient.invalidateQueries({ queryKey: ["auth-user"] });
       router.push("/");
     },
-    onError: () => toast.error("Logout failed"),
+    onError: () => toast.error("We couldn't sign you out. Please try again."),
   });
 
   const changePasswordMutation = useMutation({
@@ -202,7 +203,7 @@ function AccountContent() {
       setShowChangePassword(false);
       setPwForm({ newPassword: "", confirm: "" });
     },
-    onError: (err) => toast.error(err.message || "Failed to update password"),
+    onError: (err) => toast.error(err.message || "We couldn't update your password. Please try again."),
   });
 
   const deleteAccountMutation = useMutation({
@@ -214,7 +215,7 @@ function AccountContent() {
       queryClient.clear();
       router.push("/");
     },
-    onError: (err) => toast.error(err.message || "Failed to delete account"),
+    onError: (err) => toast.error(err.message || "We couldn't delete your account. Please contact us and we'll help."),
   });
 
   const handleChangePassword = () => {
@@ -236,7 +237,7 @@ function AccountContent() {
     const { data, error } = await supabase.auth.mfa.enroll({
       factorType: "totp",
     });
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error, "We couldn't turn on two-step verification right now. Please try again."));
     setMfaState((prev) => ({
       ...prev,
       qrCode: data.totp.qr_code,
@@ -252,7 +253,7 @@ function AccountContent() {
       factorId: mfaState.factorId,
       code: mfaState.code,
     });
-    if (error) return toast.error("Invalid code — please try again.");
+    if (error) return toast.error("That code didn't work. Check your authenticator app and try again.");
     setMfaState((prev) => ({ ...prev, enrolled: true }));
     toast.success("Two-factor authentication enabled!");
     setShowTwoFactor(false);

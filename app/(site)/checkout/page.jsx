@@ -27,6 +27,7 @@ import { formatLiberianPhone } from "@/lib/momo/phoneFormatter";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { friendlyError } from "@/lib/friendly-error";
 
 const LIBERIA_COUNTIES = [
   "Montserrado",
@@ -392,7 +393,7 @@ function CheckoutContent() {
     if (loading) return;
 
     if (!(finalTotal > 0)) {
-      toast.error("Your order total is invalid. Please review your cart.");
+      toast.error("Something's off with your cart total. Please review your cart and try again.");
       return;
     }
 
@@ -455,7 +456,7 @@ function CheckoutContent() {
         icon: <Smartphone className="h-5 w-5" />,
       });
     } catch (error) {
-      toast.error(error.message || "Payment failed to start.");
+      toast.error(friendlyError(error, "We couldn't start your MoMo payment. Please try again.", { passthrough: true }));
       setLoading(false);
     }
   };

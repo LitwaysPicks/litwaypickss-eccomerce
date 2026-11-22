@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAccessToken, requestToPay } from "@/lib/momo/service";
 import { formatLiberianPhone } from "@/lib/momo/phoneFormatter";
 import { requireUserApi } from "@/lib/api-auth";
+import { friendlyError } from "@/lib/friendly-error";
 
 export async function POST(request) {
   try {
@@ -27,19 +28,19 @@ export async function POST(request) {
 
     if (!phone) {
       return NextResponse.json(
-        { success: false, message: "Missing required field: phone" },
+        { success: false, message: "Please enter your MTN MoMo phone number." },
         { status: 400 },
       );
     }
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { success: false, message: "No items in order" },
+        { success: false, message: "Your cart is empty. Add something to order first." },
         { status: 400 },
       );
     }
     if (!deliveryInfo?.deliveryAddress) {
       return NextResponse.json(
-        { success: false, message: "Delivery address required" },
+        { success: false, message: "Please enter your delivery address." },
         { status: 400 },
       );
     }
@@ -61,7 +62,7 @@ export async function POST(request) {
     const itemIds = [...new Set(items.map((i) => i.id).filter(Boolean))];
     if (itemIds.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Invalid items" },
+        { success: false, message: "Something in your cart isn't available any more. Please review your cart and try again." },
         { status: 400 },
       );
     }
@@ -76,7 +77,7 @@ export async function POST(request) {
     if (productsError) {
       console.error("Product lookup error:", productsError);
       return NextResponse.json(
-        { success: false, message: "Failed to verify products" },
+        { success: false, message: "We couldn't check your cart right now. Please try again in a moment." },
         { status: 500 },
       );
     }
@@ -89,27 +90,27 @@ export async function POST(request) {
       const product = productMap.get(item.id);
       if (!product || product.is_hidden === true) {
         return NextResponse.json(
-          { success: false, message: `Product not available: ${item.name || item.id}` },
+          { success: false, message: `${item.name || "An item in your cart"} is no longer available. Please remove it and try again.` },
           { status: 400 },
         );
       }
       const qty = parseInt(item.quantity, 10);
       if (!Number.isFinite(qty) || qty <= 0) {
         return NextResponse.json(
-          { success: false, message: `Invalid quantity for ${product.name}` },
+          { success: false, message: `Please choose how many ${product.name} you want.` },
           { status: 400 },
         );
       }
       if (qty > product.stock) {
         return NextResponse.json(
-          { success: false, message: `Insufficient stock for ${product.name}` },
+          { success: false, message: `Sorry, we only have ${product.stock} of ${product.name} left. Please lower the quantity and try again.` },
           { status: 400 },
         );
       }
       const unitPrice = Number(product.sale_price ?? product.price);
       if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
         return NextResponse.json(
-          { success: false, message: `Invalid price for ${product.name}` },
+          { success: false, message: `${product.name} can't be bought right now. Please remove it or try again later.` },
           { status: 500 },
         );
       }
@@ -164,7 +165,7 @@ export async function POST(request) {
     if (dbError || !order) {
       console.error("DB insert error:", dbError);
       return NextResponse.json(
-        { success: false, message: "Failed to create order" },
+        { success: false, message: "We couldn't create your order. Nothing was charged. Please try again." },
         { status: 500 },
       );
     }
@@ -197,7 +198,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("Payment error:", error.message);
     return NextResponse.json(
-      { success: false, message: error.message || "Payment initiation failed" },
+      { success: false, message: friendlyError(error, "We couldn't start your MoMo payment. Check the phone number and try again. Nothing was charged.") },
       { status: 500 },
     );
   }

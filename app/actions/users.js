@@ -1,5 +1,7 @@
 "use server";
 
+import { friendlyError } from "@/lib/friendly-error";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/session";
 
@@ -13,12 +15,12 @@ export async function deleteUserAction(userId) {
     await adminSupabase.from("carts").delete().eq("user_id", userId);
 
     const { error } = await adminSupabase.auth.admin.deleteUser(userId);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     return {};
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to delete user." };
+    return { error: friendlyError(err, "Failed to delete user.") };
   }
 }
 
@@ -41,7 +43,7 @@ export async function createAdminUserAction({ email, password, firstName, lastNa
       user_metadata: { first_name: firstName, last_name: lastName },
     });
 
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     const { error: profileError } = await adminSupabase.from("users").insert({
       id: data.user.id,
@@ -61,6 +63,6 @@ export async function createAdminUserAction({ email, password, firstName, lastNa
     return {};
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to create admin user." };
+    return { error: friendlyError(err, "Failed to create admin user.") };
   }
 }

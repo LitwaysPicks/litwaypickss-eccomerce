@@ -67,7 +67,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
         toast.info("Please verify your email first — we sent you a new code.");
         return;
       }
-      toast.error(err.message || "Login failed");
+      toast.error(err.message || "We couldn't sign you in. Please try again.");
     },
   });
 
@@ -106,7 +106,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
       resetRegisterForm();
       handleSuccess();
     },
-    onError: (err) => toast.error(err.message || "Registration failed"),
+    onError: (err) => toast.error(err.message || "We couldn't create your account. Please try again."),
   });
 
   const verifyMutation = useMutation({
@@ -122,7 +122,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
       setVerifyCode("");
       handleSuccess();
     },
-    onError: (err) => toast.error(err.message || "Verification failed"),
+    onError: (err) => toast.error(err.message || "We couldn't check that code. Please try again."),
   });
 
   const resendMutation = useMutation({
@@ -144,7 +144,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, defaultTab = "l
       setView("auth");
       setForgotEmail("");
     },
-    onError: (err) => toast.error(err.message || "Failed to send reset email"),
+    onError: (err) => toast.error(err.message || "We couldn't send the reset email. Please try again."),
   });
 
   // ── Handlers ─────────────────────────────────────────────────────────────────

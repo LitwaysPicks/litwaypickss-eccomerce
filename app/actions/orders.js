@@ -1,5 +1,7 @@
 "use server";
 
+import { friendlyError } from "@/lib/friendly-error";
+
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -14,7 +16,7 @@ export async function fetchMyOrdersAction() {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return { error: "Not authenticated." };
+    if (authError || !user) return { error: "Please sign in to continue." };
 
     const admin = createAdminClient();
     const { data, error } = await admin
@@ -27,10 +29,10 @@ export async function fetchMyOrdersAction() {
       )
       .order("created_at", { ascending: false });
 
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return { data: data ?? [] };
   } catch (err) {
-    return { error: err.message || "Failed to fetch orders." };
+    return { error: friendlyError(err, "We couldn't load your orders. Please refresh and try again.") };
   }
 }
 
@@ -38,7 +40,7 @@ export async function retryOrderItemsAction(orderItems) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return { error: "Not authenticated." };
+    if (authError || !user) return { error: "Please sign in to continue." };
 
     if (!Array.isArray(orderItems) || orderItems.length === 0) {
       return { data: { available: [], unavailable: [] } };
@@ -51,7 +53,7 @@ export async function retryOrderItemsAction(orderItems) {
       .select("*") // includes is_hidden once that migration has run
       .in("id", ids);
 
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     const productMap = new Map((products ?? []).map((p) => [p.id, p]));
     const available = [];
@@ -71,6 +73,6 @@ export async function retryOrderItemsAction(orderItems) {
 
     return { data: { available, unavailable } };
   } catch (err) {
-    return { error: err.message || "Failed to check item availability." };
+    return { error: friendlyError(err, "We couldn't check these items right now. Please try again.") };
   }
 }

@@ -240,7 +240,7 @@ export default function Header() {
       setShowMobileMenu(false);
       router.push("/");
     },
-    onError: () => toast.error("Logout failed"),
+    onError: () => toast.error("We couldn't sign you out. Please try again."),
   });
 
   useEffect(() => {

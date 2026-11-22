@@ -1,5 +1,7 @@
 "use server";
 
+import { friendlyError } from "@/lib/friendly-error";
+
 import { requireAdmin } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -13,11 +15,11 @@ export async function fetchAdminNotificationsAction() {
       .select("id, type, title, message, data, read, created_at")
       .order("created_at", { ascending: false })
       .limit(50);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return { data: data ?? [] };
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to fetch notifications." };
+    return { error: friendlyError(err, "Failed to fetch notifications.") };
   }
 }
 
@@ -28,11 +30,11 @@ export async function markNotificationReadAction(id) {
       .from("admin_notifications")
       .update({ read: true })
       .eq("id", id);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return { data: { success: true } };
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to mark notification read." };
+    return { error: friendlyError(err, "Failed to mark notification read.") };
   }
 }
 
@@ -43,10 +45,10 @@ export async function markAllNotificationsReadAction() {
       .from("admin_notifications")
       .update({ read: true })
       .eq("read", false);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return { data: { success: true } };
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to mark all notifications read." };
+    return { error: friendlyError(err, "Failed to mark all notifications read.") };
   }
 }

@@ -33,7 +33,7 @@ export function CartProvider({ children }) {
     const { error } = await supabase
       .from('carts')
       .upsert({ user_id: uid, items: cartItems }, { onConflict: 'user_id' })
-    if (error) toast.error('Cart sync failed — changes may not persist')
+    if (error) toast.error("We couldn't save your cart to your account. Your items are still here on this device.")
   }
 
   const scheduleSave = (uid, cartItems) => {
@@ -89,7 +89,7 @@ export function CartProvider({ children }) {
 
       if (existing) {
         if (existing.quantity >= product.stock) {
-          toast.error('Cannot add more — stock limit reached')
+          toast.error("You've already added all we have in stock.")
           return current
         }
         const newQty = Math.min(existing.quantity + qty, product.stock)
@@ -117,7 +117,7 @@ export function CartProvider({ children }) {
       current.map(item => {
         if ((item.cartKey ?? item.id) !== cartKey) return item
         const newQuantity = Math.min(quantity, item.stock)
-        if (newQuantity !== quantity) toast.error('Quantity limited by available stock')
+        if (newQuantity !== quantity) toast.error("We only have that many in stock, so we've adjusted the quantity.")
         return { ...item, quantity: newQuantity }
       })
     )

@@ -7,7 +7,7 @@ export async function POST(request) {
 
     if (!name?.trim() || !email?.trim() || !subject?.trim() || !message?.trim()) {
       return NextResponse.json(
-        { success: false, message: "All fields are required." },
+        { success: false, message: "Please fill in your name, email and message." },
         { status: 400 },
       );
     }
@@ -15,7 +15,7 @@ export async function POST(request) {
     // Basic email format check
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
-        { success: false, message: "Invalid email address." },
+        { success: false, message: "Please enter a valid email address." },
         { status: 400 },
       );
     }
@@ -26,7 +26,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("Contact form error:", error.message);
     return NextResponse.json(
-      { success: false, message: "Failed to send message. Please try again." },
+      { success: false, message: "We couldn't send your message. Please try again, or reach us on WhatsApp." },
       { status: 500 },
     );
   }

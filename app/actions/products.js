@@ -1,5 +1,7 @@
 "use server";
 
+import { friendlyError } from "@/lib/friendly-error";
+
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/session";
 import { deleteCloudinaryImages } from "@/lib/cloudinary";
@@ -19,7 +21,7 @@ export async function deleteProductAction(productId) {
     await supabase.from("product_tags").delete().eq("product_id", productId);
 
     const { error } = await supabase.from("products").delete().eq("id", productId);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     if (product?.image_urls?.length > 0) {
       await deleteCloudinaryImages(product.image_urls).catch(() => {});
@@ -28,6 +30,6 @@ export async function deleteProductAction(productId) {
     return {};
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: err.message || "Failed to delete product." };
+    return { error: friendlyError(err, "Failed to delete product.") };
   }
 }

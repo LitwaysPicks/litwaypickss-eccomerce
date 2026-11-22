@@ -25,7 +25,7 @@ function ConfirmationContent() {
 
     if (!referenceId) {
       setPaymentStatus("error");
-      toast.error("No payment information available.");
+      toast.error("We couldn't find this payment. You can check your orders in your account.");
       return;
     }
 
@@ -38,7 +38,7 @@ function ConfirmationContent() {
         if (!res.ok) {
           if (!cancelled) {
             setPaymentStatus("error");
-            toast.error("Could not load order details.");
+            toast.error("We couldn't load your order details. Please refresh the page.");
           }
           return;
         }
@@ -46,14 +46,14 @@ function ConfirmationContent() {
         if (cancelled) return;
         if (!data?.success || !data.order) {
           setPaymentStatus("error");
-          toast.error("Could not load order details.");
+          toast.error("We couldn't load your order details. Please refresh the page.");
           return;
         }
         setOrder(data.order);
       } catch {
         if (!cancelled) {
           setPaymentStatus("error");
-          toast.error("Could not load order details.");
+          toast.error("We couldn't load your order details. Please refresh the page.");
         }
       } finally {
         // Clear the transport copy; server is now the source of truth

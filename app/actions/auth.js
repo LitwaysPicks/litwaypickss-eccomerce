@@ -1,5 +1,7 @@
 "use server";
 
+import { friendlyError } from "@/lib/friendly-error";
+
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
@@ -13,11 +15,11 @@ export async function loginAction({ email, password }) {
       email: email.trim().toLowerCase(),
       password,
     });
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     revalidatePath("/", "layout");
     return {};
   } catch (err) {
-    return { error: err.message || "Login failed." };
+    return { error: friendlyError(err, "We couldn't sign you in. Please try again.") };
   }
 }
 
@@ -33,7 +35,7 @@ export async function signupAction({
   acceptedTerms,
 }) {
   if (!email || !password || !firstName || !lastName) {
-    return { error: "All required fields must be filled." };
+    return { error: "Please fill in your first name, last name, email and password." };
   }
   if (acceptedTerms !== true) {
     return { error: "Please accept the Terms of Service and Privacy Policy to create an account." };
@@ -62,7 +64,7 @@ export async function signupAction({
         },
       },
     });
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     // Email already registered. With "Confirm email" on, Supabase hides this
     // (no error, no email sent) and returns a placeholder user whose
@@ -98,14 +100,14 @@ export async function signupAction({
       if (profileError) {
         const adminSupabase = createAdminClient();
         await adminSupabase.auth.admin.deleteUser(data.user.id);
-        return { error: "Signup failed — please try again." };
+        return { error: "We couldn't finish creating your account. Please try again." };
       }
     }
 
     revalidatePath("/", "layout");
     return {};
   } catch (err) {
-    return { error: err.message || "Signup failed." };
+    return { error: friendlyError(err, "We couldn't create your account. Please try again.") };
   }
 }
 
@@ -143,22 +145,22 @@ export async function verifySignupCodeAction({ email, code }) {
     revalidatePath("/", "layout");
     return {};
   } catch (err) {
-    return { error: err.message || "Verification failed." };
+    return { error: friendlyError(err, "We couldn't check that code. Please try again.") };
   }
 }
 
 export async function resendSignupCodeAction(email) {
-  if (!email?.trim()) return { error: "Email is required." };
+  if (!email?.trim()) return { error: "Please enter your email address." };
   try {
     const supabase = await createClient();
     const { error } = await supabase.auth.resend({
       type: "signup",
       email: email.trim().toLowerCase(),
     });
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return {};
   } catch (err) {
-    return { error: err.message || "Failed to resend code." };
+    return { error: friendlyError(err, "We couldn't send a new code. Please try again in a minute.") };
   }
 }
 
@@ -166,28 +168,28 @@ export async function logoutAction() {
   try {
     const supabase = await createClient();
     const { error } = await supabase.auth.signOut();
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     revalidatePath("/", "layout");
     return {};
   } catch (err) {
-    return { error: err.message || "Logout failed." };
+    return { error: friendlyError(err, "We couldn't sign you out. Please try again.") };
   }
 }
 
 // ─── Password management ───────────────────────────────────────────────────────
 
 export async function sendPasswordResetAction(email) {
-  if (!email?.trim()) return { error: "Email is required." };
+  if (!email?.trim()) return { error: "Please enter your email address." };
   try {
     const supabase = await createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.trim().toLowerCase(),
       { redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password` },
     );
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return {};
   } catch (err) {
-    return { error: err.message || "Failed to send reset email." };
+    return { error: friendlyError(err, "We couldn't send the reset email. Please try again in a moment.") };
   }
 }
 
@@ -198,16 +200,16 @@ export async function updatePasswordAction(newPassword) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return { error: "Session expired. Please request a new reset link." };
+    if (authError || !user) return { error: "This reset link has expired. Please request a new one." };
 
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     await supabase.auth.signOut();
     revalidatePath("/", "layout");
     return {};
   } catch (err) {
-    return { error: err.message || "Failed to update password." };
+    return { error: friendlyError(err, "We couldn't update your password. Please try again.") };
   }
 }
 
@@ -218,13 +220,13 @@ export async function changePasswordInAppAction(newPassword) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return { error: "Not authenticated." };
+    if (authError || !user) return { error: "Please sign in to continue." };
 
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
     return {};
   } catch (err) {
-    return { error: err.message || "Failed to change password." };
+    return { error: friendlyError(err, "Failed to change password.") };
   }
 }
 
@@ -232,19 +234,19 @@ export async function deleteAccountAction() {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return { error: "Not authenticated." };
+    if (authError || !user) return { error: "Please sign in to continue." };
 
     const adminSupabase = createAdminClient();
     await supabase.from("users").delete().eq("id", user.id);
     await supabase.from("carts").delete().eq("user_id", user.id);
 
     const { error } = await adminSupabase.auth.admin.deleteUser(user.id);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     revalidatePath("/", "layout");
     return {};
   } catch (err) {
-    return { error: err.message || "Failed to delete account." };
+    return { error: friendlyError(err, "We couldn't delete your account. Please contact us and we'll help.") };
   }
 }
 
@@ -254,8 +256,8 @@ export async function updateProfileAction(userId, data) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return { error: "Not authenticated." };
-    if (user.id !== userId) return { error: "Unauthorized." };
+    if (authError || !user) return { error: "Please sign in to continue." };
+    if (user.id !== userId) return { error: "You can only change your own account." };
 
     const { role: _role, email: _email, ...rawData } = data;
     const KEY_MAP = {
@@ -268,11 +270,11 @@ export async function updateProfileAction(userId, data) {
     );
 
     const { error } = await supabase.from("users").update(safeData).eq("id", userId);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     revalidatePath("/account");
     return {};
   } catch (err) {
-    return { error: err.message || "Failed to update profile." };
+    return { error: friendlyError(err, "We couldn't save your details. Please try again.") };
   }
 }

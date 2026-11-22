@@ -1,5 +1,7 @@
 "use server";
 
+import { friendlyError } from "@/lib/friendly-error";
+
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyNewReview } from "@/lib/notifications";
@@ -13,7 +15,7 @@ export async function fetchProductReviewsAction(productId) {
       .eq("product_id", productId)
       .order("created_at", { ascending: false });
 
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyError(error) };
 
     const userIds = [...new Set((data ?? []).map((r) => r.user_id))];
     let profileMap = {};
@@ -35,7 +37,7 @@ export async function fetchProductReviewsAction(productId) {
 
     return { data: reviews };
   } catch (err) {
-    return { error: err.message || "Failed to fetch reviews." };
+    return { error: friendlyError(err, "Reviews couldn't be loaded right now.") };
   }
 }
 
@@ -43,7 +45,7 @@ export async function fetchReviewableItemsAction() {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return { error: "Not authenticated." };
+    if (authError || !user) return { error: "Please sign in to continue." };
 
     const admin = createAdminClient();
     const { data: orders, error: ordersError } = await admin
@@ -82,18 +84,18 @@ export async function fetchReviewableItemsAction() {
 
     return { data: reviewable };
   } catch (err) {
-    return { error: err.message || "Failed to fetch reviewable items." };
+    return { error: friendlyError(err, "We couldn't load items to review right now.") };
   }
 }
 
 export async function submitReviewAction({ productId, orderId, rating, comment }) {
-  if (!productId || !orderId) return { error: "productId and orderId are required." };
-  if (!rating || rating < 1 || rating > 5) return { error: "Rating must be between 1 and 5." };
+  if (!productId || !orderId) return { error: "We couldn't tell which item you're reviewing. Please refresh and try again." };
+  if (!rating || rating < 1 || rating > 5) return { error: "Please choose a rating from 1 to 5 stars." };
 
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return { error: "Not authenticated." };
+    if (authError || !user) return { error: "Please sign in to continue." };
 
     const admin = createAdminClient();
 
@@ -103,14 +105,14 @@ export async function submitReviewAction({ productId, orderId, rating, comment }
       .eq("id", orderId)
       .single();
 
-    if (orderError || !order) return { error: "Order not found." };
-    if (order.customer_email !== user.email) return { error: "Order does not belong to you." };
+    if (orderError || !order) return { error: "We couldn't find that order." };
+    if (order.customer_email !== user.email) return { error: "You can only review items from your own orders." };
     if (order.payment_status !== "COMPLETED")
-      return { error: "You can only review products from completed orders." };
+      return { error: "You can review this item once your order is marked complete." };
 
     const items = Array.isArray(order.items) ? order.items : [];
     if (!items.some((item) => item.id === productId))
-      return { error: "This product is not part of the order." };
+      return { error: "That item isn't part of this order." };
 
     const { error: insertError } = await admin.from("reviews").insert({
       product_id: productId,
@@ -149,6 +151,6 @@ export async function submitReviewAction({ productId, orderId, rating, comment }
 
     return { data: { success: true } };
   } catch (err) {
-    return { error: err.message || "Failed to submit review." };
+    return { error: friendlyError(err, "We couldn't post your review. Please try again.") };
   }
 }

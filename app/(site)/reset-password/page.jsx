@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { updatePasswordAction } from "@/app/actions/auth";
 import { queryClient } from "@/lib/queryClient";
+import { friendlyError } from "@/lib/friendly-error";
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -54,7 +55,7 @@ function ResetPasswordContent() {
     attempt.then(async ({ error }) => {
       if (error) {
         setTokenStatus("invalid");
-        toast.error(error.message || "Reset link is invalid or has expired.");
+        toast.error(friendlyError(error, "This reset link is invalid or has expired. Please request a new one."));
       } else {
         const { data } = await supabase.auth.getUser();
         setAccountEmail(data?.user?.email ?? "");
@@ -75,7 +76,7 @@ function ResetPasswordContent() {
       toast.success("Password updated successfully! Please sign in again.");
       router.push("/login");
     },
-    onError: (err) => toast.error(err.message || "Failed to reset password"),
+    onError: (err) => toast.error(err.message || "We couldn't update your password. Please try again."),
   });
 
   const mismatch = confirm.length > 0 && password !== confirm;
